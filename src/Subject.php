@@ -1,0 +1,113 @@
+<?php
+
+/*
+    Subject.php
+
+    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+
+    This program is licensed to you under the Apache License Version 2.0,
+    and you may not use this file except in compliance with the Apache License
+    Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
+    http://www.apache.org/licenses/LICENSE-2.0.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the Apache License Version 2.0 is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+    express or implied. See the Apache License Version 2.0 for the specific
+    language governing permissions and limitations there under.
+
+    Authors: Joshua Beemster
+    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    License: Apache License Version 2.0
+*/
+namespace Snowplow\Tracker;
+
+class Subject {
+
+    // Subject Constants
+
+    const DEFAULT_PLATFORM = "srv";
+
+    /**
+     * Constructs an array in which subject parameters are stored
+     */
+    public function __construct() {
+        $this->tracker_settings = array("p" => self::DEFAULT_PLATFORM);
+    }
+
+    /**
+     * Returns the subject parameters as an array which can be added to the payload
+     *
+     * @return array
+     */
+    public function getSubject() {
+        return $this->tracker_settings;
+    }
+
+    // Setter Functions
+
+    /**
+     * Sets the platform from which the event is fired
+     *
+     * @param string $platform
+     */
+    public function setPlatform($platform) {
+        $this->tracker_settings["p"] = $platform;
+    }
+
+    /**
+     * Sets a custom user identification for the event
+     *
+     * @param string $userId
+     */
+    public function setUserID($userId) {
+        $this->tracker_settings["uid"] = $userId;
+    }
+
+    /**
+     * Sets the screen resolution
+     *
+     * @param int $width
+     * @param int $height
+     */
+    public function setScreenResolution($width, $height) {
+        $this->tracker_settings["res"] = $width."x".$height;
+    }
+
+    /**
+     * Sets the view port resolution
+     *
+     * @param int $width
+     * @param int $height
+     */
+    public function setViewPort($width, $height) {
+        $this->tracker_settings["vp"] = $width."x".$height;
+    }
+
+    /**
+     * Sets the colour depth
+     *
+     * @param int $depth
+     */
+    public function setColorDepth($depth) {
+        $this->tracker_settings["cd"] = $depth;
+    }
+
+    /**
+     * Sets the event timezone
+     *
+     * @param string $timezone
+     */
+    public function setTimezone($timezone) {
+        $this->tracker_settings["tz"] = $timezone;
+    }
+
+    /**
+     * Sets the language used
+     *
+     * @param string $language
+     */
+    public function setLanguage($language) {
+        $this->tracker_settings["lang"] = $language;
+    }
+}
