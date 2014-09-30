@@ -39,10 +39,10 @@ limitations under the License.
 [coveralls]: https://coveralls.io/r/snowplow/snowplow-php-tracker
 [coveralls-image]: https://coveralls.io/repos/snowplow/snowplow-php-tracker/badge.png
 
-[packagist-1]: https://packagist.org/packages/snowplow/snowplow-php-tracker
-[packagist-image-1]: https://poser.pugx.org/snowplow/snowplow-php-tracker/v/stable.png
-[packagist-2]: https://packagist.org/packages/snowplow/snowplow-php-tracker
-[packagist-image-2]: https://poser.pugx.org/snowplow/snowplow-php-tracker/downloads.png
+[packagist-1]: https://packagist.org/packages/snowplow/snowplow-tracker
+[packagist-image-1]: https://poser.pugx.org/snowplow/snowplow-tracker/v/stable.png
+[packagist-2]: https://packagist.org/packages/snowplow/snowplow-tracker
+[packagist-image-2]: https://poser.pugx.org/snowplow/snowplow-tracker/downloads.png
 
 [techdocs-image]: https://d3i6fms1cm1j0i.cloudfront.net/github/images/techdocs.png
 [setup-image]: https://d3i6fms1cm1j0i.cloudfront.net/github/images/setup.png
