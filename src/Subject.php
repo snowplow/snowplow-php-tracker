@@ -60,7 +60,7 @@ class Subject {
      *
      * @param string $userId
      */
-    public function setUserID($userId) {
+    public function setUserId($userId) {
         $this->tracker_settings["uid"] = $userId;
     }
 
