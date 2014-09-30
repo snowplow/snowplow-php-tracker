@@ -1,6 +1,6 @@
 {
     "name": "snowplow/snowplow-tracker",
-    "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and code",
+    "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
     "type": "library",
     "license": "Apache-2.0",
     "keywords": [
