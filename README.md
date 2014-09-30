@@ -35,7 +35,7 @@ limitations under the License.
 [2]: http://php.net/
 
 [travis]: https://travis-ci.org/snowplow/snowplow-php-tracker
-[travis-image]: https://travis-ci.org/snowplow/snowplow-php-tracker.svg?branch=develop
+[travis-image]: https://travis-ci.org/snowplow/snowplow-php-tracker.svg?branch=master
 [coveralls]: https://coveralls.io/r/snowplow/snowplow-php-tracker
 [coveralls-image]: https://coveralls.io/repos/snowplow/snowplow-php-tracker/badge.png
 
