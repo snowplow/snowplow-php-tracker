@@ -2,7 +2,6 @@ PHP Analytics for Snowplow
 ==========================
 [![Build Status][travis-image]][travis]
 [![Coverage Status][coveralls-image]][coveralls]
-
 [![Latest Stable Version][packagist-image-1]][packagist-1]
 [![Total Downloads][packagist-image-2]][packagist-2]
 
