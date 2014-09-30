@@ -7,7 +7,7 @@ PHP Analytics for Snowplow
 
 ##Overview
 
-Add analytics into your PHP apps and code with the [Snowplow][1] event tracker for [PHP][2].
+Add analytics into your PHP apps and scripts with the [Snowplow][1] event tracker for [PHP][2].
 
 With this tracker you can collect event data from your PHP based applications, games and frameworks.
 
