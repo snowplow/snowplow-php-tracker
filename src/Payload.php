@@ -30,13 +30,10 @@ class Payload {
      * @param string|null $tstamp - Timestamp for event
      */
     public function __construct($tstamp = NULL) {
-
         // Construct a name-value pairs array
-
         $this->nv_pairs = array();
 
         // Add Time Stamp to array on event creation
-
         $this->add("dtm", ($tstamp != NULL) ? $tstamp : $_SERVER['REQUEST_TIME'] * 1000);
     }
 

@@ -23,14 +23,11 @@
 namespace Snowplow\Tracker;
 
 class Tracker {
-
     // Tracker Constants
-
     const DEFAULT_BASE_64 = true;
     const TRACKER_VERSION = "php-0.1.0";
 
     // Schema Constants
-
     const BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow";
     const SCHEMA_TAG = "jsonschema";
 
@@ -45,10 +42,8 @@ class Tracker {
      */
     public function __construct($emitter, Subject $subject, $namespace = NULL, $app_id = NULL,
                                 $encode_base64 = NULL) {
-
         // Append the Emitter to the tracker
         // Either as an array of emitters or a single emitter
-
         if (is_array($emitter)) {
             $this->emitter = $emitter;
         }
@@ -57,16 +52,13 @@ class Tracker {
         }
 
         // Append the subject to the tracker
-
         $this->subject = $subject;
 
         // Truth for encoding in base 64
         // type: boolean
-
         $this->encode_base64 = ($encode_base64 != NULL) ? $this->stringToBool($encode_base64) : self::DEFAULT_BASE_64;
 
         // Tracker Event Parameters
-
         $this->std_nv_pairs = array(
             "tv"=>self::TRACKER_VERSION,
             "tna"=>$namespace,
@@ -74,14 +66,12 @@ class Tracker {
         );
 
         // JSON Schemas
-
         $this->CONTEXT_SCHEMA = self::BASE_SCHEMA_PATH."/contexts/".self::SCHEMA_TAG."/1-0-0";
         $this->UNSTRUCT_EVENT_SCHEMA = self::BASE_SCHEMA_PATH."/unstruct_event/".self::SCHEMA_TAG."/1-0-0";
         $this->SCREEN_VIEW_SCHEMA = self::BASE_SCHEMA_PATH."/screen_view/".self::SCHEMA_TAG."/1-0-0";
     }
 
     // Setter Functions
-
     /**
      * Updates the subject of the tracker with a new subject
      *
@@ -101,7 +91,6 @@ class Tracker {
     }
 
     // Emitter Send Functions
-
     /**
      * Sends the Payload arrays to the emitter for processing
      * Converts all values within the array into string values before sending
@@ -126,7 +115,6 @@ class Tracker {
     }
 
     // Return Functions
-
     /**
      * Takes a Payload object as a parameter and appends all necessary event data to it
      * Appends the following: subject, unique id, context, tracker standard pairs
@@ -182,7 +170,6 @@ class Tracker {
     }
 
     // Tracking Functions
-
     /**
      * Takes a Payload and a Context and forwards the finalised payload array to the sendRequest function.
      *

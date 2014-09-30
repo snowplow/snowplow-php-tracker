@@ -23,9 +23,7 @@
 namespace Snowplow\Tracker;
 
 class Subject {
-
     // Subject Constants
-
     const DEFAULT_PLATFORM = "srv";
 
     /**
@@ -45,7 +43,6 @@ class Subject {
     }
 
     // Setter Functions
-
     /**
      * Sets the platform from which the event is fired
      *

@@ -29,7 +29,6 @@ class PayloadTest extends PHPUnit_Framework_TestCase {
         $array = $event_payload->get();
 
         // Asserts
-
         $this->assertArrayHasKey("sku", $array);
         $this->assertEquals("WM5", $array["sku"]);
     }
@@ -41,7 +40,6 @@ class PayloadTest extends PHPUnit_Framework_TestCase {
         $array = $event_payload->get();
 
         // Asserts
-
         $this->assertArrayHasKey("sku", $array);
         $this->assertArrayHasKey("price", $array);
         $this->assertEquals("WM5", $array["sku"]);
@@ -64,7 +62,6 @@ class PayloadTest extends PHPUnit_Framework_TestCase {
         $array = $event_payload->get();
 
         // Asserts
-
         $this->assertArrayHasKey("name_encoded", $array);
         $this->assertArrayHasKey("name_not_encoded", $array);
         $this->assertEquals($json_base64, $array["name_encoded"]);

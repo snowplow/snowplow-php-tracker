@@ -21,7 +21,6 @@
     License: Apache License Version 2.0
 */
 namespace Snowplow\Tracker;
-
 use Requests;
 
 class Emitter {
@@ -93,7 +92,6 @@ class Emitter {
     }
 
     // Send Functions
-
     /**
      * Using a GET Request sends the data to a collector
      *
@@ -116,7 +114,6 @@ class Emitter {
     }
 
     // Make Functions
-
     /**
      * Returns the collector URL based on: request type, protocol and host given
      * IF a bad type is given in emitter creation returns NULL
@@ -148,7 +145,6 @@ class Emitter {
     }
 
     // Debug Functions
-
     /**
      * Returns the array of stored results from a request
      *
