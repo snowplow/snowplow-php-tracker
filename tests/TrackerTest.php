@@ -25,44 +25,30 @@ use Snowplow\Tracker\Emitter;
 use Snowplow\Tracker\Subject;
 
 class TrackerTest extends PHPUnit_Framework_TestCase {
-
-    /*
-        Tracker Test URIs
-        GET: d3rkrsqld9gmqf.cloudfront.net
-        POST: clojtest5-env.elasticbeanstalk.com
-    */
-
     public function __construct() {
         // Make multiple emitters
-
         $e1 = new Emitter("clojtest5-env.elasticbeanstalk.com", "POST", "http", "1");
         $e2 = new Emitter("d3rkrsqld9gmqf.cloudfront.net", "GET", "http", "1");
 
         // Make multiple tracker settings groups.
-
         $s1 = new Subject();
 
         // Create a tracker:
-
         $this->t1 = new Tracker($e1, $s1, "namespace", "app_id", "0");
 
         // Append more Emitters to the tracker.
-
         $this->t1->addEmitter($e2);
 
         // Edit subject matter from tracker
-
         $this->t1->subject->setTimezone("timezone_1");
 
         // Tracker Context Example
-
         $this->context = array(
             "schema" => "iglu:com.acme_company/context_example/jsonschema/2.1.1",
             "data" => array("movie_name" => "Solaris", "poster_country" => "JP", "poster_year" => 1978)
         );
 
         // Tracker Unstructured Event Example
-
         $this->unstruct_event = array(
             "schema" => "com.example_company/save-game/jsonschema/1.0.2",
             "data" => array("save_id" => "4321", "level" => 23, "difficultyLevel" => "HARD", "dl_content" => True)
@@ -75,7 +61,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $tracker = new Tracker($emitter, $subject, "namespace", "app_id", "0");
 
         // Asserts
-
         $this->assertEquals($tracker->emitter[0], $emitter);
         $this->assertEquals($tracker->subject, $subject);
         $this->assertEquals($tracker->encode_base64, false);
@@ -93,7 +78,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $tracker = new Tracker($emitters, $subject, "namespace", "app_id", "0");
 
         // Asserts
-
         $this->assertEquals($tracker->emitter[0], $emitter1);
         $this->assertEquals($tracker->emitter[1], $emitter2);
     }
@@ -108,16 +92,13 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $uid = $tracker->subject->getSubject();
 
         // Assert - 1
-
         $this->assertEquals("user_id_1", $uid["uid"]);
 
         // Change...
-
         $tracker->updateSubject($subject2);
         $uid = $tracker->subject->getSubject();
 
         // Assert - 2
-
         $this->assertEquals("user_id_2", $uid["uid"]);
     }
 
@@ -129,7 +110,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $tracker->addEmitter($emitter1);
 
         // Assert
-
         $this->assertEquals(2, count($tracker->emitter));
     }
 
@@ -144,7 +124,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $results = $tracker->emitter[0]->getRequestResults();
 
         // Asserts
-
         $this->assertEquals(3, count($results));
         foreach ($results as $result) {
             $this->assertEquals(200, $result["code"]);
@@ -155,7 +134,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->t1->trackPageView("www.example.com", "example", "www.referrer.com", $this->context);
 
         // Asserts
-
         foreach($this->t1->emitter as $emitter) {
             $this->assertEquals(200, $emitter->requests_results[0]["code"]);
         }
@@ -165,7 +143,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->t1->trackScreenView("HUD", "Level: 23", $this->context);
 
         // Asserts
-
         $this->assertEquals(200, $this->t1->emitter[0]->requests_results[0]["code"]);
     }
 
@@ -173,7 +150,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->t1->trackStructEvent("shop", "add-to-basket", NULL, "pcs", 2, $this->context);
 
         // Asserts
-
         foreach($this->t1->emitter as $emitter) {
             $this->assertEquals(200, $emitter->requests_results[0]["code"]);
         }
@@ -183,7 +159,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->t1->trackUnstructEvent($this->unstruct_event, $this->context);
 
         // Asserts
-
         foreach($this->t1->emitter as $emitter) {
             $this->assertEquals(200, $emitter->requests_results[0]["code"]);
         }
@@ -202,7 +177,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         );
 
         // Asserts
-
         foreach($this->t1->emitter as $emitter) {
             foreach ($emitter->requests_results as $results) {
                 $this->assertEquals(200, $results["code"]);
