@@ -25,11 +25,16 @@ namespace Snowplow\Tracker;
 class Tracker {
     // Tracker Constants
     const DEFAULT_BASE_64 = true;
-    const TRACKER_VERSION = "php-0.1.0";
+    const TRACKER_VERSION = "php-0.2.0";
+    const CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0";
+    const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
+    const SCREEN_VIEW_SCHEMA = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
 
-    // Schema Constants
-    const BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow";
-    const SCHEMA_TAG = "jsonschema";
+    // Tracker Parameters
+    private $subject;
+    private $emitters;
+    private $encode_base64;
+    private $std_nv_pairs;
 
     /**
      * Constructs a new tracker object with emitter(s) and a subject.
@@ -38,25 +43,23 @@ class Tracker {
      * @param subject $subject - Subject object, contains extra information which is parcelled with the event
      * @param string|null $namespace
      * @param string|null $app_id
-     * @param string|null $encode_base64 - Boolean stating whether or not to encode certain values as base64
+     * @param bool $encode_base64 - Boolean stating whether or not to encode certain values as base64
      */
     public function __construct($emitter, Subject $subject, $namespace = NULL, $app_id = NULL,
                                 $encode_base64 = NULL) {
-        // Append the Emitter to the tracker
-        // Either as an array of emitters or a single emitter
+        // Set the emitter or emitters for the tracker
         if (is_array($emitter)) {
-            $this->emitter = $emitter;
+            $this->emitters = $emitter;
         }
         else {
-            $this->emitter = array($emitter);
+            $this->emitters = array($emitter);
         }
 
-        // Append the subject to the tracker
+        // Set the subject for the tracker
         $this->subject = $subject;
 
-        // Truth for encoding in base 64
-        // type: boolean
-        $this->encode_base64 = ($encode_base64 != NULL) ? $this->stringToBool($encode_base64) : self::DEFAULT_BASE_64;
+        // Set truth for base_64 encoding
+        $this->encode_base64 = ($encode_base64 !== NULL) ? $encode_base64 : self::DEFAULT_BASE_64;
 
         // Tracker Event Parameters
         $this->std_nv_pairs = array(
@@ -64,11 +67,6 @@ class Tracker {
             "tna"=>$namespace,
             "aid"=>$app_id
         );
-
-        // JSON Schemas
-        $this->CONTEXT_SCHEMA = self::BASE_SCHEMA_PATH."/contexts/".self::SCHEMA_TAG."/1-0-0";
-        $this->UNSTRUCT_EVENT_SCHEMA = self::BASE_SCHEMA_PATH."/unstruct_event/".self::SCHEMA_TAG."/1-0-0";
-        $this->SCREEN_VIEW_SCHEMA = self::BASE_SCHEMA_PATH."/screen_view/".self::SCHEMA_TAG."/1-0-0";
     }
 
     // Setter Functions
@@ -86,8 +84,8 @@ class Tracker {
      *
      * @param emitter $emitter
      */
-    public function addEmitter(Emitter $emitter) {
-        array_push($this->emitter, $emitter);
+    public function addEmitter($emitter) {
+        array_push($this->emitters, $emitter);
     }
 
     // Emitter Send Functions
@@ -99,18 +97,33 @@ class Tracker {
      */
     private function sendRequest($payload) {
         $final_payload = $this->returnArrayStringify('strval', $payload);
-        foreach ($this->emitter as $emitter) {
-            $emitter->sendEvent($final_payload);
+        $nuid = $this->subject->returnNetworkUserId();
+        foreach ($this->emitters as $emitter) {
+            $emitter->addEvent($final_payload, $nuid);
         }
     }
 
     /**
      * Will force send all events in the emitter(s) buffers
      * This happens irrespective of whether or not buffer limit has been reached
+     *
+     * @param bool $force - Will force flush the emitter regardless of events in the buffer
      */
-    public function flushEmitters() {
-        foreach ($this->emitter as $emitter) {
-            $emitter->flush();
+    public function flushEmitters($force = false) {
+        $nuid = $this->subject->returnNetworkUserId();
+        foreach ($this->emitters as $emitter) {
+            $emitter->flush($force, $nuid);
+        }
+    }
+
+    /**
+     * Will turn of debugging for all emitters
+     *
+     * @param bool $deleteLocal - Will also delete all local information stored.
+     */
+    public function turnOfDebug($deleteLocal = false) {
+        foreach($this->emitters as $emitter) {
+            $emitter->turnOfDebug($deleteLocal);
         }
     }
 
@@ -125,7 +138,7 @@ class Tracker {
      */
     private function returnCompletePayload(Payload $ep, $context = NULL) {
         if ($context != NULL) {
-            $context_envelope = array("schema" => $this->CONTEXT_SCHEMA, "data" => $context);
+            $context_envelope = array("schema" => self::CONTEXT_SCHEMA, "data" => $context);
             $ep->addJson($context_envelope, $this->encode_base64, "cx", "co");
         }
         $ep->addDict($this->std_nv_pairs);
@@ -137,10 +150,10 @@ class Tracker {
     /**
      * Generates and returns a unique id string for the event
      *
-     * @return string
+     * @return string - Unique String based on the time of creation
      */
     private function generateUuid() {
-        return uniqid();
+        return uniqid("",true);
     }
 
     /**
@@ -157,16 +170,6 @@ class Tracker {
             $ret[$key] = (is_array($val)) ? $this->returnArrayStringify($func, $val) : $func($val);
         }
         return $ret;
-    }
-
-    /**
-     * Takes string as a parameter and returns a boolean value for it
-     *
-     * @param string $val - "0" or "1" as a value.
-     * @return bool
-     */
-    private function stringToBool($val) {
-        return (bool) $val;
     }
 
     // Tracking Functions
@@ -226,13 +229,13 @@ class Tracker {
      * Tracks an unstructured event with the aforementioned metrics
      *
      * @param array $event_json - The properties of the event. Has two fields:
-                                - A "data" field containing the event properties and
-                                - A "schema" field identifying the schema against which the data is validated
+     *                           - A "data" field containing the event properties and
+     *                           - A "schema" field identifying the schema against which the data is validated
      * @param array|null $context - Event Context
      * @param int|null $tstamp - Event Timestamp
      */
     public function trackUnstructEvent($event_json, $context = NULL, $tstamp = NULL) {
-        $envelope = array("schema" => $this->UNSTRUCT_EVENT_SCHEMA, "data" => $event_json);
+        $envelope = array("schema" => self::UNSTRUCT_EVENT_SCHEMA, "data" => $event_json);
         $ep = new Payload($tstamp);
         $ep->add("e", "ue");
         $ep->addJson($envelope, $this->encode_base64, "ue_px", "ue_pr");
@@ -255,7 +258,7 @@ class Tracker {
         if ($id != NULL) {
             $screen_view_properties["id"] = $id;
         }
-        $ep_json = array("schema" => $this->SCREEN_VIEW_SCHEMA, "data" => $screen_view_properties);
+        $ep_json = array("schema" => self::SCREEN_VIEW_SCHEMA, "data" => $screen_view_properties);
         $this->trackUnstructEvent($ep_json, $context, $tstamp);
     }
 
@@ -324,5 +327,42 @@ class Tracker {
         $ep->add("ti_ca", $category);
         $ep->add("ti_cu", $currency);
         $this->track($ep, $context);
+    }
+
+    // Tracker Parameter Return Functions
+    /**
+     * Returns the Trackers Subject
+     *
+     * @return Subject
+     */
+    public function returnSubject() {
+        return $this->subject;
+    }
+
+    /**
+     * Returns the Trackers Emitters as an array
+     *
+     * @return array
+     */
+    public function returnEmitters() {
+        return $this->emitters;
+    }
+
+    /**
+     * Returns the Trackers Truth regarding base64 encoding
+     *
+     * @return bool
+     */
+    public function returnEncodeBase64() {
+        return $this->encode_base64;
+    }
+
+    /**
+     * Return the standard name-value pairs of the Tracker
+     *
+     * @return array
+     */
+    public function returnStdNvPairs() {
+        return $this->std_nv_pairs;
     }
 }

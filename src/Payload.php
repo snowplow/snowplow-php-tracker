@@ -23,6 +23,8 @@
 namespace Snowplow\Tracker;
 
 class Payload {
+    // Payload Parameters
+    private $nv_pairs;
 
     /**
      * Constructs a Payload object, contains an array in which event parameters are stored

@@ -1,0 +1,18 @@
+Version 0.2.0 (2014-10-17)
+--------------------------
+Added Subject Function - setDomainUserId (#23)
+Added Subject Function - setNetworkUserId (#21)
+Added Subject Function - setUseragent (#17)
+Added Subject Function - setIpAddress (#16)
+Added CHANGELOG (#22)
+Added Versioneye version checker button to README (#13)
+Added Socket Emitter as Emitter Option for Tracker (#10)
+Added File-Based Emitter as Emitter Option for Tracker (#9)
+Added Asynchronous Curl Emitter as Emitter Option for Tracker (#8)
+Added Ability to test the full payload and response for every request (#15)
+Updated PHPUnit Dependancy to 4.2.* (#19)
+Updated payload_data version to 1-0-1 (#18)
+
+Version 0.1.0 (2014-09-30)
+--------------------------
+Initial release
