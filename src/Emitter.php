@@ -91,7 +91,7 @@ class Emitter {
     public function addEvent($final_payload, $nuid) {
         // Add an event to an old or new nuid-buffer pair
         $found_nuid = false;
-        foreach ($this->buffers as $buffer) {
+        foreach ($this->buffers as &$buffer) {
             if ($buffer["nuid"] == $nuid) {
                 array_push($buffer["buffer"], $final_payload);
                 $found_nuid = true;
