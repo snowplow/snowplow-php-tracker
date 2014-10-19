@@ -65,5 +65,7 @@ class EmitterTest extends PHPUnit_Framework_TestCase {
             $emitter->returnDebugFile());
         $this->assertEquals(1,
             count($emitter->returnBuffer()));
+        $this->assertEquals("",
+            $emitter->returnBufferNuid());
     }
 }

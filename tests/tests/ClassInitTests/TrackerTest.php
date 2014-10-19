@@ -95,7 +95,33 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(2, count($tracker->returnEmitters()));
     }
 
+    public function testTrackerChangeNuid() {
+        $tracker = new Tracker($this->e1, $this->s1, "namespace", "app_id", false);
+        $tracker->returnSubject()->setNetworkUserId("nuid");
+
+        $emitters = $tracker->returnEmitters();
+        $subject = $tracker->returnSubject();
+
+        $subject_nuid = $subject->returnNetworkUserId();
+        $this->assertEquals("nuid", $subject_nuid);
+
+        // Track two events...
+        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+
+        $emitter_nuid = $emitters[0]->returnBufferNuid();
+        $this->assertEquals($emitter_nuid, $subject_nuid);
+        $this->assertEquals(2, count($emitters[0]->returnBuffer()));
+
+        // Change the nuid and track another event
+        $tracker->returnSubject()->setNetworkUserId("new-nuid");
+        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+
+        $this->assertEquals(1, count($emitters[0]->returnBuffer()));
+        $tracker->flushEmitters(true);
+    }
+
     private function getSyncEmitter($type) {
-        return new SyncEmitter($this->uri, "http", $type, 1, true);
+        return new SyncEmitter($this->uri, "http", $type, 3, true);
     }
 }

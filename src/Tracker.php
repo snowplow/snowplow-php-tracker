@@ -110,9 +110,8 @@ class Tracker {
      * @param bool $force - Will force flush the emitter regardless of events in the buffer
      */
     public function flushEmitters($force = false) {
-        $nuid = $this->subject->returnNetworkUserId();
         foreach ($this->emitters as $emitter) {
-            $emitter->flush($force, $nuid);
+            $emitter->flush($force);
         }
     }
 

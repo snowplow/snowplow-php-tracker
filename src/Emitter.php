@@ -30,6 +30,7 @@ class Emitter {
     // Emitter Parameters
     private $buffer_size;
     private $buffer = array();
+    private $buffer_nuid = "";
 
     // Debug Parameters
     private $debug_mode = false;
@@ -58,11 +59,10 @@ class Emitter {
      * Sends the buffer to the configured emitter for sending
      *
      * @param bool $force
-     * @param string $nuid
      */
-    public function flush($force = false, $nuid) {
+    public function flush($force = false) {
         if (count($this->buffer) > 0 || $force) {
-            $res = $this->send($this->buffer, $nuid, $force);
+            $res = $this->send($this->buffer, $this->buffer_nuid, $force);
             if (is_bool($res) && $res) {
                 if ($this->debug_mode) {
                     fwrite($this->debug_file,"Emitter sent payload successfully\n");
@@ -81,14 +81,22 @@ class Emitter {
     /**
      * Pushes the event payload into the emitter buffer
      * When buffer is full it flushes the buffer
+     * - Checks for any changes in the nuid parameter.
+     * - If there has been a change it will:
+     *   - flush the current buffer
+     *   - set the new nuid
      *
      * @param array $final_payload - Takes the Trackers Payload as a parameter
      * @param string $nuid - The trackers network user id
      */
     public function addEvent($final_payload, $nuid) {
+        if ($nuid != $this->buffer_nuid) {
+            $this->flush(true);
+            $this->buffer_nuid = $nuid;
+        }
         array_push($this->buffer, $final_payload);
         if (count($this->buffer) >= $this->buffer_size) {
-            $this->flush(false, $nuid);
+            $this->flush(false);
         }
     }
 
@@ -143,6 +151,15 @@ class Emitter {
      */
     public function returnDebugFile() {
         return $this->debug_file;
+    }
+
+    /**
+     * Returns the emitters current nuid setting
+     *
+     * @return string
+     */
+    public function returnBufferNuid() {
+        return $this->buffer_nuid;
     }
 
     // Debug Setup
