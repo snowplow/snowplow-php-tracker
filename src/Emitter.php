@@ -29,8 +29,7 @@ class Emitter {
 
     // Emitter Parameters
     private $buffer_size;
-    private $buffer = array();
-    private $buffer_nuid = "";
+    private $buffers = array();
 
     // Debug Parameters
     private $debug_mode = false;
@@ -58,22 +57,22 @@ class Emitter {
     /**
      * Sends the buffer to the configured emitter for sending
      *
+     * @param array $buffer
+     * @param string $nuid
      * @param bool $force
      */
-    public function flush($force = false) {
-        if (count($this->buffer) > 0 || $force) {
-            $res = $this->send($this->buffer, $this->buffer_nuid, $force);
+    private function flush($buffer, $nuid, $force = false) {
+        if (count($buffer) > 0 || $force) {
+            $res = $this->send($buffer, $nuid, $force);
             if (is_bool($res) && $res) {
                 if ($this->debug_mode) {
                     fwrite($this->debug_file,"Emitter sent payload successfully\n");
                 }
-                $this->buffer = array();
             }
             else {
                 if ($this->debug_mode) {
-                    fwrite($this->debug_file,$res."\nPayload: ".json_encode($this->buffer)."\n\n");
+                    fwrite($this->debug_file,$res."\nPayload: ".json_encode($buffer)."\n\n");
                 }
-                $this->buffer = array();
             }
         }
     }
@@ -90,13 +89,40 @@ class Emitter {
      * @param string $nuid - The trackers network user id
      */
     public function addEvent($final_payload, $nuid) {
-        if ($nuid != $this->buffer_nuid) {
-            $this->flush(true);
-            $this->buffer_nuid = $nuid;
+        // Add an event to an old or new nuid-buffer pair
+        $found_nuid = false;
+        foreach ($this->buffers as $buffer) {
+            if ($buffer["nuid"] == $nuid) {
+                array_push($buffer["buffer"], $final_payload);
+                $found_nuid = true;
+            }
         }
-        array_push($this->buffer, $final_payload);
-        if (count($this->buffer) >= $this->buffer_size) {
-            $this->flush(false);
+        if (!$found_nuid) {
+            $new_nuid_buffer = array(
+                "nuid" => $nuid,
+                "buffer" => array($final_payload)
+            );
+            array_push($this->buffers, $new_nuid_buffer);
+        }
+
+        // Check if any of the nuid-buffer pairs are ready for sending
+        foreach ($this->buffers as &$buffer) {
+            if (count($buffer["buffer"]) >= $this->buffer_size) {
+                $this->flush($buffer["buffer"], $buffer["nuid"]);
+                $buffer["buffer"] = array();
+            }
+        }
+    }
+
+    /**
+     * Force sends all current buffers to the collector
+     *
+     * @param bool $force
+     */
+    public function forceFlush($force = false) {
+        foreach ($this->buffers as &$buffer) {
+            $this->flush($buffer["buffer"], $buffer["nuid"], $force);
+            $buffer["buffer"] = array();
         }
     }
 
@@ -130,8 +156,8 @@ class Emitter {
      *
      * @return array
      */
-    public function returnBuffer() {
-        return $this->buffer;
+    public function returnBuffers() {
+        return $this->buffers;
     }
 
     // Make Functions
@@ -151,15 +177,6 @@ class Emitter {
      */
     public function returnDebugFile() {
         return $this->debug_file;
-    }
-
-    /**
-     * Returns the emitters current nuid setting
-     *
-     * @return string
-     */
-    public function returnBufferNuid() {
-        return $this->buffer_nuid;
     }
 
     // Debug Setup

@@ -111,7 +111,7 @@ class Tracker {
      */
     public function flushEmitters($force = false) {
         foreach ($this->emitters as $emitter) {
-            $emitter->flush($force);
+            $emitter->forceFlush($force);
         }
     }
 

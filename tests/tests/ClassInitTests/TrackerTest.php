@@ -95,33 +95,42 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(2, count($tracker->returnEmitters()));
     }
 
-    public function testTrackerChangeNuid() {
+    public function testNuidQueues() {
         $tracker = new Tracker($this->e1, $this->s1, "namespace", "app_id", false);
-        $tracker->returnSubject()->setNetworkUserId("nuid");
-
-        $emitters = $tracker->returnEmitters();
         $subject = $tracker->returnSubject();
-
-        $subject_nuid = $subject->returnNetworkUserId();
-        $this->assertEquals("nuid", $subject_nuid);
-
-        // Track two events...
-        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
 
-        $emitter_nuid = $emitters[0]->returnBufferNuid();
-        $this->assertEquals($emitter_nuid, $subject_nuid);
-        $this->assertEquals(2, count($emitters[0]->returnBuffer()));
-
-        // Change the nuid and track another event
-        $tracker->returnSubject()->setNetworkUserId("new-nuid");
+        $subject->setNetworkUserId("nuid-1");
         $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
 
-        $this->assertEquals(1, count($emitters[0]->returnBuffer()));
+        $subject->setNetworkUserId("nuid-2");
+        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+
+        $nuid_array = array("", "nuid-1", "nuid-2");
+
+        // Check that we have three buffer-nuid arrays
+        $emitters = $tracker->returnEmitters();
+        foreach ($emitters as $emitter) {
+            $buffers = $emitter->returnBuffers();
+            $this->assertEquals(3, count($buffers));
+            for ($i = 0; $i < 3; $i++) {
+                $this->assertEquals($nuid_array[$i], $buffers[$i]["nuid"]);
+            }
+        }
+
+        // Send the three events
         $tracker->flushEmitters(true);
+
+        // Check everything sent
+        foreach ($emitters as $emitter) {
+            $buffers = $emitter->returnBuffers();
+            foreach ($buffers as $buffer) {
+                $this->assertEquals(0, count($buffer["buffer"]));
+            }
+        }
     }
 
     private function getSyncEmitter($type) {
-        return new SyncEmitter($this->uri, "http", $type, 3, true);
+        return new SyncEmitter($this->uri, "http", $type, 2, true);
     }
 }
