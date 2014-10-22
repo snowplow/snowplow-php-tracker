@@ -97,9 +97,8 @@ class Tracker {
      */
     private function sendRequest($payload) {
         $final_payload = $this->returnArrayStringify('strval', $payload);
-        $nuid = $this->subject->returnNetworkUserId();
         foreach ($this->emitters as $emitter) {
-            $emitter->addEvent($final_payload, $nuid);
+            $emitter->addEvent($final_payload);
         }
     }
 

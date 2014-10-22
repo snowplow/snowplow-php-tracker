@@ -106,6 +106,13 @@ class SubjectTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("domain_id", $settings["duid"]);
     }
 
+    public function testAddNetworkUserId() {
+        $this->subject->setNetworkUserId("tnuid");
+        $settings = $this->getTrackerSettings();
+        $this->assertArrayHasKey("tnuid", $settings);
+        $this->assertEquals("tnuid", $settings["tnuid"]);
+    }
+
     private function getTrackerSettings() {
         return $this->subject->returnTrackerSettings();
     }

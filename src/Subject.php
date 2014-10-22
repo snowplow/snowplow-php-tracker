@@ -28,7 +28,6 @@ class Subject {
 
     // Subject Parameters
     private $tracker_settings;
-    private $nuid = "";
 
     /**
      * Constructs an array in which subject parameters are stored
@@ -136,7 +135,7 @@ class Subject {
      * @param string $networkUserId
      */
     public function setNetworkUserId($networkUserId) {
-        $this->nuid = $networkUserId;
+        $this->tracker_settings["tnuid"] = $networkUserId;
     }
 
     /**
@@ -151,9 +150,5 @@ class Subject {
     // Subject Return Functions
     public function returnTrackerSettings() {
         return $this->tracker_settings;
-    }
-
-    public function returnNetworkUserId() {
-        return $this->nuid;
     }
 }

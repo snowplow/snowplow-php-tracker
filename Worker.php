@@ -132,7 +132,6 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
     // Get the file contents
     $contents = file_get_contents($file);
     $lines = explode("\n", $contents);
-    $nuid = "";
 
     // Create the payload buffer and curl_buffer
     $buffer = array();
@@ -143,25 +142,19 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
         if (!trim($line)) {
             continue;
         }
-        // Set the Network User ID
-        if ($nuid == "" && strpos($line, "NUID: ") !== false) {
-            $nuid = substr($line,(strpos($line,":")+2));
+        $payload = json_decode($line, true);
+        if ($type == "POST") {
+            // Add Payloads into the buffer until we reach the limit.
+            array_push($buffer,$payload);
+            if (count($buffer) >= $buffer_size) {
+                $data = returnPostRequest($buffer);
+                array_push($curl_buffer, returnCurlRequest($data, $url, $type));
+                $buffer = array();
+            }
         }
         else {
-            $payload = json_decode($line, true);
-            if ($type == "POST") {
-                // Add Payloads into the buffer until we reach the limit.
-                array_push($buffer,$payload);
-                if (count($buffer) >= $buffer_size) {
-                    $data = returnPostRequest($buffer);
-                    array_push($curl_buffer, returnCurlRequest($data, $url, $type, $nuid));
-                    $buffer = array();
-                }
-            }
-            else {
-                $data = http_build_query($payload);
-                array_push($curl_buffer, returnCurlRequest($data, $url, $type, $nuid));
-            }
+            $data = http_build_query($payload);
+            array_push($curl_buffer, returnCurlRequest($data, $url, $type));
         }
     }
 
@@ -170,7 +163,7 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
     if (count($buffer) != 0) {
         if ($type == "POST") {
             $data = returnPostRequest($buffer);
-            array_push($curl_buffer, returnCurlRequest($data, $url, $type, $nuid));
+            array_push($curl_buffer, returnCurlRequest($data, $url, $type));
         }
     }
 
@@ -185,19 +178,15 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
  * @param string $payload
  * @param string $url
  * @param string $type
- * @param string $nuid - The Trackers network user id
  * @return resource
  */
-function returnCurlRequest($payload, $url, $type, $nuid) {
+function returnCurlRequest($payload, $url, $type) {
     $ch = curl_init($url);
     if ($type == "POST") {
         $header = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
             'Content-Length: '.strlen($payload));
-        if ($nuid != "") {
-            array_push($header, 'Cookie: sp='.$nuid);
-        }
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
@@ -205,9 +194,6 @@ function returnCurlRequest($payload, $url, $type, $nuid) {
     else {
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
         curl_setopt($ch, CURLOPT_URL, $url."?".$payload);
-        if ($nuid != "") {
-            curl_setopt($ch, CURLOPT_HTTPHEADER, array('Cookie: sp='.$nuid));
-        }
     }
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     return $ch;

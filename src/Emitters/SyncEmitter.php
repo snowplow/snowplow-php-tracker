@@ -59,17 +59,16 @@ class SyncEmitter extends Emitter {
      * Sends data with the configured Request type
      *
      * @param array $buffer
-     * @param string $nuid - The Trackers network user id
      * @return bool $res
      */
-    public function send($buffer, $nuid) {
+    public function send($buffer) {
         if (count($buffer) > 0) {
             $res = true;
             $type = $this->type;
             if ($type == "GET") {
                 $res_ = "";
                 foreach ($buffer as $payload) {
-                    $res = $this->getRequest($payload, $nuid);
+                    $res = $this->getRequest($payload);
                     if (!is_bool($res)) {
                         $res_.= $res;
                     }
@@ -80,7 +79,7 @@ class SyncEmitter extends Emitter {
             }
             else if ($type == "POST") {
                 $data = $this->getPostRequest($buffer);
-                $res = $this->postRequest($data, $nuid);
+                $res = $this->postRequest($data);
             }
             return $res;
         }
@@ -92,16 +91,11 @@ class SyncEmitter extends Emitter {
      * Using a GET Request sends the data to a collector
      *
      * @param array $data - The array which is going to be sent in the GET Request
-     * @param string $nuid - The network user id of the tracker
      * @return bool - Return whether the request was successful
      */
-    private function getRequest($data, $nuid) {
-        $header = array('Connection' => 'close');
-        if ($nuid != "") {
-            $header = array('Cookie' => "sp=".$nuid);
-        }
+    private function getRequest($data) {
         try {
-            $r = Requests::get($this->url.http_build_query($data), $header);
+            $r = Requests::get($this->url.http_build_query($data));
             if ($this->debug) {
                 $this->storeRequestResults($r, $data);
             }
@@ -121,14 +115,10 @@ class SyncEmitter extends Emitter {
      * Using a POST Request sends the data to a collector
      *
      * @param array $data - Is the array which is going to be sent in the POST Request
-     * @param string $nuid - The network user id of the tracker
      * @return bool - Return whether the request was successful
      */
-    private function postRequest($data, $nuid) {
+    private function postRequest($data) {
         $header = array('Content-Type' => 'application/json; charset=utf-8');
-        if ($nuid != "") {
-            $header['Cookie'] = "sp=".$nuid;
-        }
         try {
             $r = Requests::post($this->url, $header, json_encode($data));
             if ($this->debug) {

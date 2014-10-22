@@ -57,13 +57,13 @@ class EmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testReturnFunctions() {
         $emitter = new SyncEmitter($this->uri, "http", "GET", 10, false);
-        $emitter->addEvent(array("something" => "something"), "");
+        $emitter->addEvent(array("something" => "something"));
 
         $this->assertEquals(false,
             $emitter->returnDebugMode());
         $this->assertEquals(NULL,
             $emitter->returnDebugFile());
         $this->assertEquals(1,
-            count($emitter->returnBuffers()));
+            count($emitter->returnBuffer()));
     }
 }

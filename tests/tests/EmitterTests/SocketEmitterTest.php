@@ -24,7 +24,7 @@ use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 
 class SocketEmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "228e51cc.ngrok.com";
+    private $uri = "5af018b5.ngrok.com";
     private $badUri = "dummy-post-colllector.cloudfront.com";
 
     public function testSocketForceFlushGet() {

@@ -71,17 +71,16 @@ class CurlEmitter extends Emitter{
      * - Or force the execution of the curl flush
      *
      * @param $buffer
-     * @param string $nuid - The Trackers network user id
      * @param bool $force
      * @return bool
      */
-    public function send($buffer, $nuid, $force = false) {
+    public function send($buffer, $force = false) {
         $type = $this->type;
         $debug = $this->debug;
         if (count($buffer) > 0) {
             if ($type == "POST") {
                 $payload = $this->getPostRequest($buffer);
-                $curl = $this->getCurlRequest($payload, $type, $nuid);
+                $curl = $this->getCurlRequest($payload, $type);
                 array_push($this->curl_buffer, $curl);
                 if ($debug) {
                     array_push($this->debug_payloads, array("handle" => $curl, "payload" => $payload));
@@ -90,7 +89,7 @@ class CurlEmitter extends Emitter{
             else {
                 foreach ($buffer as $event) {
                     $payload = http_build_query($event);
-                    $curl = $this->getCurlRequest($payload, $type, $nuid);
+                    $curl = $this->getCurlRequest($payload, $type);
                     array_push($this->curl_buffer, $curl);
                 }
             }
@@ -179,19 +178,15 @@ class CurlEmitter extends Emitter{
      *
      * @param string $payload - Data included in request
      * @param string $type - Type of request to be made
-     * @param string $nuid - The Trackers network user id
      * @return resource
      */
-    private function getCurlRequest($payload, $type, $nuid) {
+    private function getCurlRequest($payload, $type) {
         $ch = curl_init($this->url);
         if ($type == "POST") {
             $header = array(
                 'Content-Type: application/json; charset=utf-8',
                 'Accept: application/json',
                 'Content-Length: '.strlen($payload));
-            if ($nuid != "") {
-                array_push($header, 'Cookie: sp='.$nuid);
-            }
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
@@ -199,9 +194,6 @@ class CurlEmitter extends Emitter{
         else {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($ch, CURLOPT_URL, $this->url."?".$payload);
-            if ($nuid != "") {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, array('Cookie: sp='.$nuid));
-            }
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         return $ch;

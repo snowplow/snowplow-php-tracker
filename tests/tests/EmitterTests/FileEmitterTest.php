@@ -24,7 +24,7 @@ use Snowplow\Tracker\Emitters\FileEmitter;
 use Snowplow\Tracker\Subject;
 
 class FileEmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "228e51cc.ngrok.com";
+    private $uri = "5af018b5.ngrok.com";
 
     public function testFilePostForceFlush() {
         $tracker = $this->returnTracker("POST", false);
@@ -39,7 +39,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     public function testFileGetForceFlush() {
         $tracker = $this->returnTracker("GET", false);
         $tracker->returnSubject()->setNetworkUserId("network-id");
-        for ($i = 0; $i < 1; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
@@ -55,6 +55,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 10; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
+        $tracker->flushEmitters(true);
     }
 
     public function testBadType() {
@@ -76,7 +77,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
             $emitter->returnFilePath());
         $this->assertEquals(0,
             $emitter->returnWorkerCount());
-        $this->assertEquals(2,
+        $this->assertEquals(5,
             $emitter->returnTimeout());
         $this->assertEquals("POST",
             $emitter->returnType());
@@ -97,6 +98,6 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     }
 
     private function returnFileEmitter($type) {
-        return new FileEmitter($this->uri, false, $type, 3, 2, 2);
+        return new FileEmitter($this->uri, false, $type, 3, 5, 100);
     }
 }

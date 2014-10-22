@@ -65,15 +65,11 @@ class FileEmitter extends Emitter{
      * Sends the events log file to a folder being watched by a worker
      *
      * @param array $buffer
-     * @param string $nuid - The Trackers network user id
      * @return bool;
      */
-    public function send($buffer, $nuid) {
+    public function send($buffer) {
         if (count($buffer) > 0) {
             // Add jsons to the log file.
-            if ($nuid != "") {
-                fwrite($this->log_file, "NUID: ".$nuid."\n");
-            }
             foreach ($buffer as $event) {
                 fwrite($this->log_file, json_encode($event)."\n");
             }

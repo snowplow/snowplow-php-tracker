@@ -65,10 +65,9 @@ class SocketEmitter extends Emitter{
      * Sends all the events in the buffer to the HTTP Socket
      *
      * @param array $buffer
-     * @param string $nuid - The Trackers network user id
      * @return bool $res
      */
-    public function send($buffer, $nuid) {
+    public function send($buffer) {
         if (count($buffer) > 0) {
             $uri = $this->uri;
             $type = $this->type;
@@ -77,7 +76,7 @@ class SocketEmitter extends Emitter{
             if (is_bool($socket_made) && $socket_made) {
                 if ($type == "POST") {
                     $data = $this->getPostRequest($buffer);
-                    $body = $this->getRequestBody($uri, $data, $type, $nuid);
+                    $body = $this->getRequestBody($uri, $data, $type);
 
                     // Send requests to the socket
                     $res = $this->makeRequest($body);
@@ -88,7 +87,7 @@ class SocketEmitter extends Emitter{
                     $res_ = "";
                     foreach ($buffer as $event) {
                         $data = http_build_query($event);
-                        $body = $this->getRequestBody($uri, $data, $type, $nuid);
+                        $body = $this->getRequestBody($uri, $data, $type);
 
                         // Send request to the socket
                         $res = $this->makeRequest($body);
@@ -207,19 +206,15 @@ class SocketEmitter extends Emitter{
      * @param string $uri - Collector URI to be used for the request
      * @param string|array $data - Data to be included in the Request
      * @param string $type - Type of request to be made (POST || GET)
-     * @param string $nuid - The Trackers network user id
      * @return string - Returns the request body
      */
-    private function getRequestBody($uri, $data, $type, $nuid) {
+    private function getRequestBody($uri, $data, $type) {
         if ($type == "POST") {
             $req = "POST http://".$uri.self::POST_PATH." ";
             $req.= "HTTP/1.1\r\n";
             $req.= "Host: ".$uri."\r\n";
             $req.= "Content-Type: application/json; charset=utf-8\r\n";
             $req.= "Content-length: ".strlen($data)."\r\n";
-            if ($nuid != "") {
-                $req.= "Cookie: sp=".$nuid."\r\n";
-            }
             $req.= "Accept: application/json\r\n\r\n";
             $req.= $data."\r\n\r\n";
         }
@@ -228,9 +223,6 @@ class SocketEmitter extends Emitter{
             $req.= "HTTP/1.1\r\n";
             $req.= "Host: ".$uri."\r\n";
             $req.= "Query: ".$data."\r\n";
-            if ($nuid != "") {
-                $req.= "Cookie: sp=".$nuid."\r\n";
-            }
             $req.= "\r\n";
         }
         return $req;
