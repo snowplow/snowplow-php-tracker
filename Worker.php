@@ -2,8 +2,18 @@
 // Parse Arguments from command line
 $args = parse($argv);
 
+// Check that parameters were set
 if (!isset($args["type"])) {
     die("--type must be given");
+}
+if (!isset($args["file_path"])) {
+    die("--file_path must be given");
+}
+if (!isset($args["url"])) {
+    die("--url must be given");
+}
+if (!isset($args["timeout"])) {
+    die("--timeout must be given");
 }
 
 // Worker Params
@@ -12,20 +22,24 @@ $dir = $args["file_path"]."/";
 $url = $args["url"];
 $timeout = $args["timeout"];
 
+// Set the buffer_size and rolling window for our events
 if ($type == "POST") {
     $buffer_size = 50;
     $rolling_window = 5;
 }
-else {
+else if ($type == "GET") {
     $buffer_size = 1;
     $rolling_window = 25;
+}
+else {
+    die("Invalid --type parameter supplied: ".$type);
 }
 
 // Worker Loop
 $loop = true;
 $count = 0;
 
-while ($loop && $count <= 1) {
+while ($loop && $count <= 4) {
     // Try to fetch a file
     $path = getEventsFile($dir);
     if (strlen($path) > 0) {
@@ -36,15 +50,21 @@ while ($loop && $count <= 1) {
         $path = $dir.$path;
         $path = renameEventsLog($path);
 
-        // Consume File
-        $ret = consume($url, $path, $type, $buffer_size, $rolling_window);
+        // Consume and send events in the file
+        $curl_buffer = consumeFile($url, $path, $type, $buffer_size);
+        $ret = execute($curl_buffer, $rolling_window);
+
+        // If any of the curls failed copy the log-file to the failed directory
+        // Currently is set as an 'all or nothing' failure approach.
         if (!$ret) {
             copy($path, dirname(dirname($path))."/failed-logs/failed-".rand().".log");
         }
+
+        // Delete the log-file
         unlink($path);
     }
     else {
-        // No files to consume currently, have a sleep
+        // No files to consume currently
         sleep($timeout);
         $count++;
     }
@@ -125,10 +145,9 @@ function renameEventsLog($path) {
  * @param string $file
  * @param string $type
  * @param int $buffer_size
- * @param int $rolling_window
  * @return bool - Returns the success of the transmission
  */
-function consume($url, $file, $type, $buffer_size, $rolling_window) {
+function consumeFile($url, $file, $type, $buffer_size) {
     // Get the file contents
     $contents = file_get_contents($file);
     $lines = explode("\n", $contents);
@@ -144,8 +163,7 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
         }
         $payload = json_decode($line, true);
         if ($type == "POST") {
-            // Add Payloads into the buffer until we reach the limit.
-            array_push($buffer,$payload);
+            array_push($buffer, $payload);
             if (count($buffer) >= $buffer_size) {
                 $data = returnPostRequest($buffer);
                 array_push($curl_buffer, returnCurlRequest($data, $url, $type));
@@ -158,22 +176,19 @@ function consume($url, $file, $type, $buffer_size, $rolling_window) {
         }
     }
 
-    // If there are any events left over in the buffer
-    // - or if the buffer_size was too big for the amount of events...
+    // If there are any events left over in the buffer or if the buffer_size was bigger than the amount of events
     if (count($buffer) != 0) {
         if ($type == "POST") {
             $data = returnPostRequest($buffer);
             array_push($curl_buffer, returnCurlRequest($data, $url, $type));
         }
     }
-
-    // Start sending requests
-    return rollingCurl($curl_buffer, $rolling_window);
+    return $curl_buffer;
 }
 
 // Worker Functions
 /**
- * Create a curl object
+ * Creates a GET or POST curl resource
  *
  * @param string $payload
  * @param string $url
@@ -220,7 +235,7 @@ function returnPostRequest($buffer) {
  * @param int $rolling_window - amount of concurrent requests
  * @return bool
  */
-function rollingCurl($curls, $rolling_window) {
+function execute($curls, $rolling_window) {
     $master = curl_multi_init();
 
     // Add curls to handler.
@@ -229,6 +244,8 @@ function rollingCurl($curls, $rolling_window) {
         $ch = $curls[$i];
         curl_multi_add_handle($master, $ch);
     }
+
+    // Execute the rolling curl
     do {
         $execrun = curl_multi_exec($master, $running);
         while ($execrun == CURLM_CALL_MULTI_PERFORM);
@@ -244,7 +261,7 @@ function rollingCurl($curls, $rolling_window) {
                     curl_multi_add_handle($master, $ch);
                 }
 
-                // Close the finished curl handler.
+                // Close and remove the finished curl.
                 curl_multi_remove_handle($master, $done['handle']);
                 curl_close($done['handle']);
             }
