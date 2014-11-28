@@ -45,7 +45,7 @@ if (!isset($args["buffer"])) {
 
 // Worker Parameters
 $type           = $args["type"];
-$dir            = $args["file_path"]."/";
+$dir            = $args["file_path"];
 $url            = $args["url"];
 $timeout        = $args["timeout"];
 $buffer_size    = $args["buffer"];
