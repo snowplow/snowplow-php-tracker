@@ -41,7 +41,7 @@ class Constants {
      * - Get Path: the path appended to the collector uri for all GET requests
      * - Protocol: the default protocol to be used for the collector
      * - SSL: the default for whether or not to use SSL Encryption
-     * - Type: the default for what type of request the emitter will be making
+     * - Type: the default for what type of request the emitter will be making (POST or GET)
      */
 	const TRACKER_VERSION       = "php-0.2.0";
     const DEFAULT_BASE_64       = true;
