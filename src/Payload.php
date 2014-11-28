@@ -73,7 +73,7 @@ class Payload extends Constants {
      * @param string $name_not_encoded - Name of the field when encode_base64 is set
      */
     public function addJson($json, $base_64, $name_encoded, $name_not_encoded) {
-        if ($json != null) {
+        if ($json != NULL) {
             if ($base_64) {
                 $this->add($name_encoded, base64_encode(json_encode($json)));
             }
