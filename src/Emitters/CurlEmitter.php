@@ -213,7 +213,13 @@ class CurlEmitter extends Emitter{
     }
 
     /**
-     * Disables debug mode
+     * Disables debug mode for the emitter
+     * - If deleteLocal is true it will also empty
+     *   the local cache of stored request codes and
+     *   the associated payloads.
+     * - Will then trigger a function in the base
+     *   emitter class to clean out the physical
+     *   debug records.
      *
      * @param bool $deleteLocal - Empty results array
      */
@@ -222,6 +228,9 @@ class CurlEmitter extends Emitter{
         if ($deleteLocal) {
             $this->requests_results = array();
         }
+
+        // Switch Debug off in Base Emitter Class
+        $this->debugSwitch($deleteLocal);
     }
 
     // Curl Return Functions
