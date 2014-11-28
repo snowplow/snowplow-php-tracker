@@ -54,7 +54,7 @@ class Tracker extends Constants {
         $this->subject = $subject;
 
         // Set truth for base_64 encoding
-        $this->encode_base64 = ($encode_base64 !== NULL) ? $encode_base64 : self::DEFAULT_BASE_64;
+        $this->encode_base64 = $encode_base64 !== NULL ? $encode_base64 : self::DEFAULT_BASE_64;
 
         // Tracker Event Parameters
         $this->std_nv_pairs = array(
