@@ -22,10 +22,7 @@
 */
 namespace Snowplow\Tracker;
 
-class Emitter {
-    // Emitter Constants
-    const POST_REQ_SCEHMA = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1";
-    const POST_PATH = "/com.snowplowanalytics.snowplow/tp2";
+class Emitter extends Constants {
 
     // Emitter Parameters
     private $buffer_size;
@@ -40,7 +37,7 @@ class Emitter {
      * Setup emitter parameters
      * - Stores the emitter sub-class object
      * - Sets the emitter buffer size
-     * - Sets if we are going to debug
+     * - Sets debug mode
      *
      * @param string $type
      * @param bool $debug
@@ -118,6 +115,40 @@ class Emitter {
         }
     }
 
+    /**
+     * Returns the Collector URL
+     *
+     * @param string $type - The type of request we will be making to the collector
+     * @param string $uri - Collector URI
+     * @param string $protocol - What protocol we are using for the collector
+     * @return string
+     */
+    public function getCollectorUrl($type, $uri, $protocol) {
+        $protocol = $protocol == NULL ? self::DEFAULT_PROTOCOL : $protocol;
+        if ($type == "POST") {
+            return $protocol."://".$uri.self::POST_PATH;
+        }
+        else {
+            return $protocol."://".$uri.self::GET_PATH;
+        }
+    }
+
+    /**
+     * Returns the request type that the emitter will use
+     * - Makes sure that we cannot return an invalid type
+     *   as the type determines many facets of the emitters
+     * - If there is an invalid type OR NULL it will always
+     *   be the default type == POST
+     */
+    public function getRequestType($type) {
+        switch ($type) {
+            case "POST" : return $type;
+            case "GET"  : return $type;
+            case NULL   : return self::DEFAULT_REQ_TYPE;
+            default     : return self::DEFAULT_REQ_TYPE;
+        }
+    }
+
     // Return Functions
     /**
      * Returns the buffer_size
@@ -166,9 +197,9 @@ class Emitter {
         $this->debug_mode = true;
         $id = uniqid("", true);
         $this->initDebugLogFiles($id, $emitter_type);
-        fwrite($this->debug_file,"Event Log File\n");
-        fwrite($this->debug_file,"Emitter: ".$emitter_type."\n");
-        fwrite($this->debug_file,"ID: ".$id."\n\n");
+        fwrite($this->debug_file, "Event Log File\n");
+        fwrite($this->debug_file, "Emitter: ".$emitter_type."\n");
+        fwrite($this->debug_file, "ID: ".$id."\n\n");
     }
 
     /**
@@ -178,11 +209,11 @@ class Emitter {
      * @param string $type - Type of emitter we are logging for
      */
     private function initDebugLogFiles($id, $type) {
-        $root_path = dirname(__DIR__);
-        if (!is_dir($root_path."/debug")) {
-            mkdir($root_path."/debug");
+        $debug_dir = dirname(__DIR__)."/debug";
+        if (!is_dir($debug_dir)) {
+            mkdir($debug_dir);
         }
-        $this->path = $root_path."/debug/".$type."-events-log-".$id.".log";
+        $this->path = $debug_dir."/".$type."-events-log-".$id.".log";
         $this->debug_file = fopen($this->path,"w");
     }
 }

@@ -19,27 +19,67 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Emitters\CurlEmitter;
 
+/**
+ * This test asserts that for every type of event the tracker
+ * can record we are getting the desired output.
+ * 
+ * Tests every event type for:
+ * - Sync Emitter
+ * - Socket Emitter
+ * - Curl Emitter
+ */
 class IntegrationTest extends PHPUnit_Framework_TestCase {
-    private $uri = "228e51cc.ngrok.com";
 
-    public function testDebugSwitch() {
-        $tracker = $this->getTracker("GET");
-        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        $tracker->flushEmitters(true);
+    // Helper Functions & Values
 
-        $tracker->turnOfDebug(true);
-        $emitters = $tracker->returnEmitters();
-        foreach ($emitters as $emitter) {
-            $results = $emitter->returnRequestResults();
-            $this->assertEquals(0, count($results));
-        }
+    // Tracker, Emitter & Context Builders
+
+    private function getTracker($type) {
+        $subject = new Subject();
+        $e1 = $this->getSyncEmitter($type);
+        $e2 = $this->getSocketEmitter($type);
+        $e3 = $this->getCurlEmitter($type);
+
+        $emitters = array($e1, $e2, $e3);
+        return new Tracker($emitters, $subject, NULL, NULL, false);
     }
+
+    private function getSyncEmitter($type) {
+        return new SyncEmitter("5af018b5.ngrok.com", NULL, $type, NULL, true);
+    }
+
+    private function getSocketEmitter($type) {
+        return new SocketEmitter("5af018b5.ngrok.com", NULL, $type, NULL, NULL, true);
+    }
+
+    private function getCurlEmitter($type) {
+        return new CurlEmitter("5af018b5.ngrok.com", NULL, $type, NULL, true);
+    }
+
+    // Pre-built Context & Unstruct-Event
+
+    private function getContext() {
+        return array(
+            "schema" => "iglu:com.acme_company/context_example/jsonschema/2.1.1",
+            "data" => array("movie_name" => "Solaris", "poster_country" => "JP", "poster_year" => 1978)
+        );
+    }
+
+    private function getUnstructEvent() {
+        return array(
+            "schema" => "com.example_company/save-game/jsonschema/1.0.2",
+            "data" => array("save_id" => "4321", "level" => 23, "difficultyLevel" => "HARD", "dl_content" => True)
+        );
+    }
+
+    // Tests
 
     public function testPvGet() {
         $tracker = $this->getTracker("GET");
@@ -125,7 +165,22 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->requestResultAssert($tracker->returnEmitters(), "ecommerce-post");
     }
 
-    // Assert Switcher!
+    public function testDebugSwitch() {
+        $tracker = $this->getTracker("GET");
+        $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        $tracker->flushEmitters(true);
+        $tracker->turnOfDebug(true);
+        $emitters = $tracker->returnEmitters();
+        foreach ($emitters as $emitter) {
+            $results = $emitter->returnRequestResults();
+            $this->assertEquals(0, count($results));
+        }
+    }
+
+    // ASSERTION FUNCTIONS
+
+    // Assert Switcher - used as we need to loop through multiple sets of data to test every emitter
+
     private function requestResultAssert($emitters, $test) {
         foreach($emitters as $emitter) {
             $results = $emitter->returnRequestResults();
@@ -157,9 +212,9 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     }
 
     // Page View Key Asserts
+
     private function assertPageViewGet($data) {
         $data = json_decode($data, true);
-
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
         $this->assertArrayHasKey("tv", $data);
@@ -168,7 +223,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey("url", $data);
         $this->assertArrayHasKey("page", $data);
         $this->assertArrayHasKey("refr", $data);
-
         $this->assertEquals("pv", $data["e"]);
         $this->assertEquals("www.example.com", $data["url"]);
         $this->assertEquals("example", $data["page"]);
@@ -182,6 +236,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
 
         $data = $data["data"];
+
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
@@ -191,7 +246,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("url", $event);
             $this->assertArrayHasKey("page", $event);
             $this->assertArrayHasKey("refr", $event);
-
             $this->assertEquals("pv", $event["e"]);
             $this->assertEquals("www.example.com", $event["url"]);
             $this->assertEquals("example", $event["page"]);
@@ -200,6 +254,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     }
 
     // Screen View Key Asserts
+
     private function assertScreenViewGet($data) {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
@@ -209,7 +264,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey("e", $data);
         $this->assertArrayHasKey("co", $data);
         $this->assertArrayHasKey("ue_pr", $data);
-
         $this->assertEquals("ue", $data["e"]);
     }
 
@@ -220,6 +274,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
 
         $data = $data["data"];
+
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
@@ -228,12 +283,12 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("e", $event);
             $this->assertArrayHasKey("co", $event);
             $this->assertArrayHasKey("ue_pr", $event);
-
             $this->assertEquals("ue", $event["e"]);
         }
     }
 
     // Structured Event Key Asserts
+
     private function assertStructEventGet($data) {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
@@ -245,7 +300,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey("se_ac", $data);
         $this->assertArrayHasKey("se_pr", $data);
         $this->assertArrayHasKey("se_va", $data);
-
         $this->assertEquals("se", $data["e"]);
         $this->assertEquals("shop", $data["se_ca"]);
         $this->assertEquals("add-to-basket", $data["se_ac"]);
@@ -260,6 +314,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
 
         $data = $data["data"];
+
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
@@ -270,7 +325,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("se_ac", $event);
             $this->assertArrayHasKey("se_pr", $event);
             $this->assertArrayHasKey("se_va", $event);
-
             $this->assertEquals("se", $event["e"]);
             $this->assertEquals("shop", $event["se_ca"]);
             $this->assertEquals("add-to-basket", $event["se_ac"]);
@@ -289,7 +343,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey("e", $data);
         $this->assertArrayHasKey("ue_pr", $data);
         $this->assertArrayHasKey("co", $data);
-
         $this->assertEquals("ue", $data["e"]);
     }
 
@@ -300,6 +353,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
 
         $data = $data["data"];
+
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
@@ -308,7 +362,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("e", $event);
             $this->assertArrayHasKey("ue_pr", $event);
             $this->assertArrayHasKey("co", $event);
-
             $this->assertEquals("ue", $event["e"]);
         }
     }
@@ -333,7 +386,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("tr_ci", $data);
             $this->assertArrayHasKey("tr_st", $data);
             $this->assertArrayHasKey("tr_co", $data);
-
             $this->assertEquals("200", $data["tr_tt"]);
             $this->assertEquals("GBP", $data["tr_cu"]);
             $this->assertEquals("affiliation_1", $data["tr_af"]);
@@ -351,7 +403,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             $this->assertArrayHasKey("ti_nm", $data);
             $this->assertArrayHasKey("ti_ca", $data);
             $this->assertArrayHasKey("ti_cu", $data);
-
             $this->assertEquals("100", $data["ti_pr"]);
             $this->assertEquals("sku_1", $data["ti_sk"]);
             $this->assertEquals("1", $data["ti_qu"]);
@@ -368,6 +419,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
 
         $data = $data["data"];
+
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
@@ -386,7 +438,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
                 $this->assertArrayHasKey("tr_ci", $event);
                 $this->assertArrayHasKey("tr_st", $event);
                 $this->assertArrayHasKey("tr_co", $event);
-
                 $this->assertEquals("200", $event["tr_tt"]);
                 $this->assertEquals("GBP", $event["tr_cu"]);
                 $this->assertEquals("affiliation_1", $event["tr_af"]);
@@ -404,7 +455,6 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
                 $this->assertArrayHasKey("ti_nm", $event);
                 $this->assertArrayHasKey("ti_ca", $event);
                 $this->assertArrayHasKey("ti_cu", $event);
-
                 $this->assertEquals("100", $event["ti_pr"]);
                 $this->assertEquals("sku_1", $event["ti_sk"]);
                 $this->assertEquals("1", $event["ti_qu"]);
@@ -413,43 +463,5 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
                 $this->assertEquals("GBP", $event["ti_cu"]);
             }
         }
-    }
-
-    // Tracker, Emitters, Context Builders
-    private function getTracker($type) {
-        $subject = new Subject();
-        $e1 = $this->getSyncEmitter($type);
-        $e2 = $this->getSocketEmitter($type);
-        $e3 = $this->getCurlEmitter($type);
-
-        $emitters = array($e1, $e2, $e3);
-        return new Tracker($emitters, $subject, NULL, NULL, false);
-    }
-
-    private function getSyncEmitter($type) {
-        return new SyncEmitter($this->uri, "http", $type, 10, true);
-    }
-
-    private function getSocketEmitter($type) {
-        return new SocketEmitter($this->uri, NULL, $type, NULL, NULL, true);
-    }
-
-    private function getCurlEmitter($type) {
-        return new CurlEmitter($this->uri, false, $type, 10, true);
-    }
-
-    // Pre-built context and unstruct-event
-    private function getContext() {
-        return array(
-            "schema" => "iglu:com.acme_company/context_example/jsonschema/2.1.1",
-            "data" => array("movie_name" => "Solaris", "poster_country" => "JP", "poster_year" => 1978)
-        );
-    }
-
-    private function getUnstructEvent() {
-        return array(
-            "schema" => "com.example_company/save-game/jsonschema/1.0.2",
-            "data" => array("save_id" => "4321", "level" => 23, "difficultyLevel" => "HARD", "dl_content" => True)
-        );
     }
 }

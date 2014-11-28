@@ -22,7 +22,8 @@
 */
 namespace Snowplow\Tracker;
 
-class Payload {
+class Payload extends Constants {
+    
     // Payload Parameters
     private $nv_pairs;
 

@@ -24,35 +24,30 @@ namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
 
 class CurlEmitter extends Emitter{
-    // Emitter Constants
-    const CURL_AMOUNT_POST = 50;
-    const CURL_AMOUNT_GET = 250;
-    const CURL_WINDOW_POST = 10;
-    const CURL_WINDOW_GET = 30;
 
     // Emitter Parameters
-    private $url;
-    private $ssl;
     private $type;
+    private $url;
 
     // Curl Specific Parameters
     private $curl_buffer = array();
-    private $curl_amount;
+    private $curl_limit;
     private $rolling_window;
 
     /**
      * Constructs an async curl emitter.
      *
      * @param string $uri
-     * @param bool|null $ssl
+     * @param string|null $protocol
      * @param string|null $type
      * @param int|null $buffer_size
      * @param bool $debug
      */
-    public function __construct($uri, $ssl = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
-        $this->ssl = ($ssl != NULL) ? (bool) $ssl : false;
-        $this->type = ($type != NULL) ? $type : "POST";
-        $this->url = $this->getUrl($this->type, $this->ssl, $uri);
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
+        $this->type           = $this->getRequestType($type);
+        $this->url            = $this->getCollectorUrl($this->type, $uri, $protocol);
+        $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
+        $this->rolling_window = $this->type == "POST" ? self::CURL_WINDOW_POST : self::CURL_WINDOW_GET;
 
         // If Debug is on create a requests_results
         $this->debug = $debug;
@@ -61,7 +56,7 @@ class CurlEmitter extends Emitter{
             $this->debug_payloads = array();
             $this->requests_results = array();
         }
-        $buffer = ($buffer_size != NULL) ? $buffer_size : 50;
+        $buffer = $buffer_size == NULL ? self::CURL_BUFFER : $buffer_size;
         $this->setup("curl", $debug, $buffer);
     }
 
@@ -77,11 +72,15 @@ class CurlEmitter extends Emitter{
     public function send($buffer, $force = false) {
         $type = $this->type;
         $debug = $this->debug;
+
+        // If the sent buffer contains events...
         if (count($buffer) > 0) {
             if ($type == "POST") {
                 $payload = $this->getPostRequest($buffer);
                 $curl = $this->getCurlRequest($payload, $type);
                 array_push($this->curl_buffer, $curl);
+
+                // If debug is on; store the handle and the payload
                 if ($debug) {
                     array_push($this->debug_payloads, array("handle" => $curl, "payload" => $payload));
                 }
@@ -94,7 +93,8 @@ class CurlEmitter extends Emitter{
                 }
             }
         }
-        if (count($this->curl_buffer) >= $this->curl_amount) {
+
+        if (count($this->curl_buffer) >= $this->curl_limit) {
             return $this->rollingCurl($this->curl_buffer, $debug);
         }
         else if ($force) {
@@ -105,7 +105,8 @@ class CurlEmitter extends Emitter{
                 return "No curls to send!";
             }
         }
-        return "Still adding to the curl buffer: ".count($this->curl_buffer);
+
+        return "Still adding to the curl buffer: count ".count($this->curl_buffer)." - limit ".$this->curl_limit;
     }
 
     /**
@@ -136,6 +137,7 @@ class CurlEmitter extends Emitter{
             curl_multi_add_handle($master, $ch);
         }
 
+        // Execute the rolling curl
         do {
             $execrun = curl_multi_exec($master, $running);
             while ($execrun == CURLM_CALL_MULTI_PERFORM);
@@ -184,8 +186,8 @@ class CurlEmitter extends Emitter{
         $ch = curl_init($this->url);
         if ($type == "POST") {
             $header = array(
-                'Content-Type: application/json; charset=utf-8',
-                'Accept: application/json',
+                'Content-Type: '.self::POST_CONTENT_TYPE,
+                'Accept: '.self::POST_ACCEPT,
                 'Content-Length: '.strlen($payload));
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
@@ -211,33 +213,6 @@ class CurlEmitter extends Emitter{
     }
 
     /**
-     * Makes and returns the collector url
-     * - Sets the curl buffer amount
-     * - Sets the rolling window for the curl emitter
-     *
-     * @param string $type
-     * @param bool $ssl
-     * @param string $uri
-     * @return null|string
-     */
-    private function getUrl($type, $ssl, $uri) {
-        $protocol = ($ssl) ? "https" : "http";
-        if ($type == "POST") {
-            $this->curl_amount = self::CURL_AMOUNT_POST;
-            $this->rolling_window = self::CURL_WINDOW_POST;
-            return $protocol."://".$uri.self::POST_PATH;
-        }
-        else if ($type == "GET") {
-            $this->curl_amount = self::CURL_AMOUNT_GET;
-            $this->rolling_window = self::CURL_WINDOW_GET;
-            return $protocol."://".$uri."/i";
-        }
-        else {
-            return NULL;
-        }
-    }
-
-    /**
      * Disables debug mode
      *
      * @param bool $deleteLocal - Empty results array
@@ -257,15 +232,6 @@ class CurlEmitter extends Emitter{
      */
     public function returnUrl() {
         return $this->url;
-    }
-
-    /**
-     * Returns whether or not we are using ssl
-     *
-     * @return bool
-     */
-    public function returnSsl() {
-        return $this->ssl;
     }
 
     /**
@@ -292,7 +258,7 @@ class CurlEmitter extends Emitter{
      * @return int
      */
     public function returnCurlAmount() {
-        return $this->curl_amount;
+        return $this->curl_limit;
     }
 
     /**
@@ -326,7 +292,11 @@ class CurlEmitter extends Emitter{
             $debug_payload = $this->debug_payloads[$i];
             if ($debug_payload["handle"] == $done['handle']) {
                 $data = $debug_payload["payload"];
+
+                // Delete the curl handle & payload from storage
                 unset($this->debug_payloads[$i]);
+
+                // Re-index the array after the deletion
                 $this->debug_payloads = array_values($this->debug_payloads);
             }
         }

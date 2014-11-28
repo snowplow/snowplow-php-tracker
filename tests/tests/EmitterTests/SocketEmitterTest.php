@@ -19,16 +19,53 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 
+/**
+ * Tests the functionality of the Socket emitter
+ */
 class SocketEmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "5af018b5.ngrok.com";
-    private $badUri = "dummy-post-colllector.cloudfront.com";
+
+    // Helper Functions & Values
+
+    private $uri = "localhost:4545";
+
+    private function requestResultAssert($emitters) {
+        foreach($emitters as $emitter) {
+            $results = $emitter->returnRequestResults();
+            foreach ($results as $result) {
+                $this->assertEquals(200, $result["code"]);
+            }
+        }
+    }
+
+    private function returnTracker($type, $debug) {
+        $subject = new Subject();
+        $e1 = $this->returnSocketEmitter($type, $this->uri, $debug);
+        return new Tracker($e1, $subject, NULL, NULL, true);
+    }
+
+    private function returnSocketEmitter($type, $uri, $debug) {
+        return new SocketEmitter($uri, NULL, $type, NULL, NULL, $debug);
+    }
+
+    // Tests
 
     public function testSocketForceFlushGet() {
         $tracker = $this->returnTracker("GET", false);
+        $tracker->returnSubject()->setNetworkUserId("network-id");
+        $tracker->flushEmitters(true);
+        for ($i = 0; $i < 1; $i++) {
+            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        }
+        $tracker->flushEmitters(true);
+    }
+
+    public function testSocketForceFlushPost() {
+        $tracker = $this->returnTracker("POST", false);
         $tracker->returnSubject()->setNetworkUserId("network-id");
         $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
@@ -48,15 +85,6 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
         $this->requestResultAssert($tracker->returnEmitters());
     }
 
-    public function testSocketForceFlushPost() {
-        $tracker = $this->returnTracker("POST", false);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
-        for ($i = 0; $i < 1; $i++) {
-            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        }
-        $tracker->flushEmitters(true);
-    }
-
     public function testSocketDebugPost() {
         $tracker = $this->returnTracker("POST", true);
         for ($i = 0; $i < 1; $i++) {
@@ -73,6 +101,7 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
         $emitters = $tracker->returnEmitters();
         $emitter = $emitters[0];
 
+        // Asserts
         $this->assertEquals(false,
             $emitter->returnSsl());
         $this->assertEquals($this->uri,
@@ -85,26 +114,5 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
             $emitter->returnSocket());
         $this->assertEquals(false,
             $emitter->returnSocketIsFailed());
-    }
-
-    private function requestResultAssert($emitters) {
-        foreach($emitters as $emitter) {
-            $results = $emitter->returnRequestResults();
-            foreach ($results as $result) {
-                $this->assertEquals(200, $result["code"]);
-            }
-        }
-    }
-
-    private function returnTracker($type, $debug) {
-        $subject = new Subject();
-        $e1 = $this->returnSocketEmitter($type, $this->uri, $debug);
-        $e2 = $this->returnSocketEmitter($type, $this->badUri, $debug);
-
-        return new Tracker(array($e1, $e2), $subject, NULL, NULL, true);
-    }
-
-    private function returnSocketEmitter($type, $uri, $debug) {
-        return new SocketEmitter($uri, NULL, $type, NULL, NULL, $debug);
     }
 }

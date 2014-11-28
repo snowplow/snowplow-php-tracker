@@ -19,12 +19,26 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Subject;
 
+/**
+ * Tests all of the functions for adding information
+ * into the Tracker Subject.
+ */
 class SubjectTest extends PHPUnit_Framework_TestCase {
+
+    // Helper Functions
+
     public function __construct() {
         $this->subject = new Subject();
     }
+
+    private function getTrackerSettings() {
+        return $this->subject->returnTrackerSettings();
+    }
+
+    // Tests
 
     public function testSubjectCreation() {
         $subject = new Subject();
@@ -111,9 +125,5 @@ class SubjectTest extends PHPUnit_Framework_TestCase {
         $settings = $this->getTrackerSettings();
         $this->assertArrayHasKey("tnuid", $settings);
         $this->assertEquals("tnuid", $settings["tnuid"]);
-    }
-
-    private function getTrackerSettings() {
-        return $this->subject->returnTrackerSettings();
     }
 }

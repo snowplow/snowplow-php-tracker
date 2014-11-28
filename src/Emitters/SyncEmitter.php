@@ -26,10 +26,10 @@ use Requests;
 use Exception;
 
 class SyncEmitter extends Emitter {
+    
     // Emitter Parameters
-    private $url;
     private $type;
-    private $protocol;
+    private $url;
 
     /**
      * Creates a Synchronous Emitter
@@ -41,9 +41,8 @@ class SyncEmitter extends Emitter {
      * @param bool $debug
      */
     public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
-        $this->type = ($type == NULL) ? "POST" : $type;
-        $this->protocol = ($protocol == NULL) ? "http" : $protocol;
-        $this->url = $this->getUrl($uri, $this->protocol, $this->type);
+        $this->type = $this->getRequestType($type);
+        $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
 
         // If Debug is on create a requests_results
         $this->debug = $debug;
@@ -51,7 +50,7 @@ class SyncEmitter extends Emitter {
             $this->debug = true;
             $this->requests_results = array();
         }
-        $buffer = $this->getBufferSize($this->type, $buffer_size, 50, 1);
+        $buffer = $buffer_size == NULL ? self::SYNC_BUFFER : $buffer_size;
         $this->setup("sync", $debug, $buffer);
     }
 
@@ -83,7 +82,7 @@ class SyncEmitter extends Emitter {
             }
             return $res;
         }
-        return "No events to write";
+        return "No events to send";
     }
 
     // Send Functions
@@ -95,19 +94,20 @@ class SyncEmitter extends Emitter {
      */
     private function getRequest($data) {
         try {
-            $r = Requests::get($this->url.http_build_query($data));
+            $r = Requests::get($this->url."?".http_build_query($data));
             if ($this->debug) {
-                $this->storeRequestResults($r, $data);
+                $this->storeRequestResults($r->status_code, $data);
+                if ($r->status_code != 200) {
+                    return "Sync GET Request Failed: ".$r->status_code;
+                }
             }
-            if ($r->status_code == 200) {
-                return true;
-            }
-            else {
-                return "Get Failed: ".$r->status_code;
-            }
+            return true;
         }
         catch (Exception $e) {
-            return "Get Failed: ".$e;
+            if ($this->debug) {
+                $this->storeRequestResults(404, $data);
+            }
+            return "Sync GET Request Failed: ".$e;
         }
     }
 
@@ -118,21 +118,22 @@ class SyncEmitter extends Emitter {
      * @return bool - Return whether the request was successful
      */
     private function postRequest($data) {
-        $header = array('Content-Type' => 'application/json; charset=utf-8');
+        $header = array('Content-Type' => self::POST_CONTENT_TYPE);
         try {
             $r = Requests::post($this->url, $header, json_encode($data));
             if ($this->debug) {
-                $this->storeRequestResults($r, $data);
+                $this->storeRequestResults($r->status_code, $data);
+                if ($r->status_code != 200) {
+                    return "Sync POST Request Failed: ".$r->status_code;
+                }
             }
-            if ($r->status_code == 200) {
-                return true;
-            }
-            else {
-                return "Post Failed: ".$r->status_code;
-            }
+            return true;
         }
         catch (Exception $e) {
-            return "Post Failed: ".$e;
+            if ($this->debug) {
+                $this->storeRequestResults(404, $data);
+            }
+            return "Sync POST Request Failed: ".$e;
         }
     }
 
@@ -153,25 +154,6 @@ class SyncEmitter extends Emitter {
 
     // Return Functions
     /**
-     * Returns the collector URL based on: request type, protocol and host given
-     * IF a bad type is given in emitter creation returns NULL
-     *
-     * @param string $uri - The Collector URI to be used for tracking
-     * @param string $protocol - The collector protocol to use
-     * @param string $type - The type of request to be made
-     * @return string|null collector_url - Returns the Collector URL
-     */
-    private function getUrl($uri, $protocol, $type) {
-        switch ($type) {
-            case "POST": return $protocol."://".$uri.self::POST_PATH;
-                break;
-            case "GET": return $protocol."://".$uri."/i?";
-                break;
-            default: return NULL;
-        }
-    }
-
-    /**
      * Returns an array which has been formatted to be ready for a POST Request
      *
      * @param array $buffer
@@ -182,29 +164,6 @@ class SyncEmitter extends Emitter {
         return $data;
     }
 
-    /**
-     * Sets the buffer size for the emitter
-     *
-     * @param int $buffer_size
-     * @param int $default_1
-     * @param int $default_2
-     * @param string $type
-     * @return int - Returns the calculated buffer size
-     */
-    private function getBufferSize($type, $buffer_size, $default_1, $default_2) {
-        if ($buffer_size == NULL) {
-            if ($type == "POST") {
-                return $default_1;
-            }
-            else {
-                return $default_2;
-            }
-        }
-        else {
-            return $buffer_size;
-        }
-    }
-
     // Sync Return Functions
     /**
      * Returns the Emitter Collector URL
@@ -213,15 +172,6 @@ class SyncEmitter extends Emitter {
      */
     public function returnUrl() {
         return $this->url;
-    }
-
-    /**
-     * Returns the Emitter HTTP Protocol
-     *
-     * @return null|string
-     */
-    public function returnProtocol() {
-        return $this->protocol;
     }
 
     /**
@@ -246,11 +196,11 @@ class SyncEmitter extends Emitter {
     /**
      * Stores all of the parameters of the Request Response into a Dynamic Array for use in unit testing.
      *
-     * @param \Requests_Response $r - Is the response from a GET or POST request
+     * @param int $code - Is the response from a GET or POST request
      * @param array $data - The payload array that is being sent
      */
-    private function storeRequestResults(\Requests_Response $r, array $data) {
-        $array["code"] = $r->status_code;
+    private function storeRequestResults($code, array $data) {
+        $array["code"] = $code;
         $array["data"] = json_encode($data);
         array_push($this->requests_results, $array);
     }

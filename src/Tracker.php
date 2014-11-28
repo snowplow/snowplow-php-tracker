@@ -22,13 +22,7 @@
 */
 namespace Snowplow\Tracker;
 
-class Tracker {
-    // Tracker Constants
-    const DEFAULT_BASE_64 = true;
-    const TRACKER_VERSION = "php-0.2.0";
-    const CONTEXT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-0";
-    const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
-    const SCREEN_VIEW_SCHEMA = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
+class Tracker extends Constants {
 
     // Tracker Parameters
     private $subject;
@@ -47,6 +41,7 @@ class Tracker {
      */
     public function __construct($emitter, Subject $subject, $namespace = NULL, $app_id = NULL,
                                 $encode_base64 = NULL) {
+
         // Set the emitter or emitters for the tracker
         if (is_array($emitter)) {
             $this->emitters = $emitter;
@@ -63,9 +58,9 @@ class Tracker {
 
         // Tracker Event Parameters
         $this->std_nv_pairs = array(
-            "tv"=>self::TRACKER_VERSION,
-            "tna"=>$namespace,
-            "aid"=>$app_id
+            "tv"  => self::TRACKER_VERSION,
+            "tna" => $namespace,
+            "aid" => $app_id
         );
     }
 

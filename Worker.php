@@ -1,8 +1,29 @@
 <?php
+/*
+    Worker.php
+
+    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+
+    This program is licensed to you under the Apache License Version 2.0,
+    and you may not use this file except in compliance with the Apache License
+    Version 2.0. You may obtain a copy of the Apache License Version 2.0 at
+    http://www.apache.org/licenses/LICENSE-2.0.
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the Apache License Version 2.0 is distributed on
+    an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+    express or implied. See the Apache License Version 2.0 for the specific
+    language governing permissions and limitations there under.
+
+    Authors: Joshua Beemster
+    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    License: Apache License Version 2.0
+*/
+
 // Parse Arguments from command line
 $args = parse($argv);
 
-// Check that parameters were set
+// Check that all of the parameters were set
 if (!isset($args["type"])) {
     die("--type must be given");
 }
@@ -15,31 +36,26 @@ if (!isset($args["url"])) {
 if (!isset($args["timeout"])) {
     die("--timeout must be given");
 }
+if (!isset($args["window"])) {
+    die("--window must be given");
+}
+if (!isset($args["buffer"])) {
+    die("--buffer must be given");
+}
 
-// Worker Params
-$type = $args["type"];
-$dir = $args["file_path"]."/";
-$url = $args["url"];
-$timeout = $args["timeout"];
-
-// Set the buffer_size and rolling window for our events
-if ($type == "POST") {
-    $buffer_size = 50;
-    $rolling_window = 5;
-}
-else if ($type == "GET") {
-    $buffer_size = 1;
-    $rolling_window = 25;
-}
-else {
-    die("Invalid --type parameter supplied: ".$type);
-}
+// Worker Parameters
+$type           = $args["type"];
+$dir            = $args["file_path"]."/";
+$url            = $args["url"];
+$timeout        = $args["timeout"];
+$buffer_size    = $args["buffer"];
+$rolling_window = $args["window"];
 
 // Worker Loop
 $loop = true;
 $count = 0;
 
-while ($loop && $count <= 4) {
+while ($loop && $count < 5) {
     // Try to fetch a file
     $path = getEventsFile($dir);
     if (strlen($path) > 0) {
@@ -127,11 +143,11 @@ function renameEventsLog($path) {
     $old = $path;
     $path = $dir.'/consuming-'.rand().'.log';
     if(!file_exists($old)) {
-        print("file: $old does not exist");
+        print("File: ".$old." does not exist");
         exit(0);
     }
     if (!rename($old, $path)) {
-        print("error renaming from $old to new\n");
+        print("Error: renaming from ".$old." to new\n");
         exit(1);
     }
     return $path;

@@ -19,13 +19,42 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\CurlEmitter;
 
+/**
+ * Tests the functionality of the Curl emitter
+ */
 class CurlEmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "5af018b5.ngrok.com";
-    private $badUri = "dummy-post-colllector.cloudfront.com";
+
+    // Helper Functions & Values
+
+    private $uri = "localhost:4545";
+
+    private function requestResultAssert($emitters) {
+        foreach($emitters as $emitter) {
+            $results = $emitter->returnRequestResults();
+            foreach ($results as $result) {
+                if ($result["code"] != 0) {
+                    $this->assertEquals(200, $result["code"]);
+                }
+            }
+        }
+    }
+
+    private function returnTracker($type, $debug) {
+        $subject = new Subject();
+        $e1 = $this->returnCurlEmitter($type, $this->uri, $debug);
+        return new Tracker($e1, $subject, NULL, NULL, true);
+    }
+
+    private function returnCurlEmitter($type, $uri, $debug) {
+        return new CurlEmitter($uri, false, $type, 2, $debug);
+    }
+
+    // Tests
 
     public function testCurlForceFlushGet() {
         $tracker = $this->returnTracker("GET", false);
@@ -36,6 +65,15 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $tracker->flushEmitters(false);
 
         // Add an event and flush again
+        for ($i = 0; $i < 1; $i++) {
+            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        }
+        $tracker->flushEmitters(true);
+    }
+
+    public function testCurlForceFlushPost() {
+        $tracker = $this->returnTracker("POST", false);
+        $tracker->returnSubject()->setNetworkUserId("network-id");
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
@@ -53,22 +91,6 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $this->requestResultAssert($tracker->returnEmitters());
     }
 
-    public function testCurlPost() {
-        $tracker = $this->returnTracker("POST", false);
-        for ($i = 0; $i < 100; $i++) {
-            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        }
-    }
-
-    public function testCurlForceFlushPost() {
-        $tracker = $this->returnTracker("POST", false);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
-        for ($i = 0; $i < 1; $i++) {
-            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        }
-        $tracker->flushEmitters(true);
-    }
-
     public function testCurlDebugPost() {
         $tracker = $this->returnTracker("POST", true);
         for ($i = 0; $i < 1; $i++) {
@@ -81,10 +103,11 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testBadType() {
-        $tracker = $this->returnTracker("BAD", false);
+        $tracker = $this->returnTracker("POSTS", false);
         $emitters = $tracker->returnEmitters();
         $emitter = $emitters[0];
-        $this->assertNull($emitter->returnUrl());
+        $this->assertEquals("http://".$this->uri."/com.snowplowanalytics.snowplow/tp2",
+            $emitter->returnUrl());
     }
 
     public function testReturnFunctions() {
@@ -94,8 +117,6 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals("http://".$this->uri."/com.snowplowanalytics.snowplow/tp2",
             $emitter->returnUrl());
-        $this->assertEquals(false,
-            $emitter->returnSsl());
         $this->assertEquals("POST",
             $emitter->returnType());
         $this->assertEquals(0,
@@ -104,28 +125,5 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
             $emitter->returnCurlAmount());
         $this->assertEquals(10,
             $emitter->returnRollingWindow());
-    }
-
-    private function requestResultAssert($emitters) {
-        foreach($emitters as $emitter) {
-            $results = $emitter->returnRequestResults();
-            foreach ($results as $result) {
-                if ($result["code"] != 0) {
-                    $this->assertEquals(200, $result["code"]);
-                }
-            }
-        }
-    }
-
-    private function returnTracker($type, $debug) {
-        $subject = new Subject();
-        $e1 = $this->returnCurlEmitter($type, $this->uri, $debug);
-        $e2 = $this->returnCurlEmitter($type, $this->badUri, $debug);
-
-        return new Tracker(array($e1, $e2), $subject, NULL, NULL, true);
-    }
-
-    private function returnCurlEmitter($type, $uri, $debug) {
-        return new CurlEmitter($uri, false, $type, 2, $debug);
     }
 }

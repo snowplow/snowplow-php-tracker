@@ -19,44 +19,47 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Emitters\CurlEmitter;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 use Snowplow\Tracker\Emitters\FileEmitter;
 
+/**
+ * Tests the creation of all the emitters.
+ */
 class EmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "228e51cc.ngrok.com";
 
     public function testCurlEmitterInit() {
-        $emitter = new CurlEmitter($this->uri, false, "GET", 1, false);
+        $emitter = new CurlEmitter("collecter.acme.au", false, "GET", 1, false);
 
         // Asserts
         $this->assertNotNull($emitter);
     }
 
     public function testSyncEmitterInit() {
-        $emitter = new SyncEmitter($this->uri, "http", "GET", 1, false);
+        $emitter = new SyncEmitter("collecter.acme.au", "http", "GET", 1, false);
 
         // Asserts
         $this->assertNotNull($emitter);
     }
 
     public function testSocketEmitterInit() {
-        $emitter = new SocketEmitter($this->uri, NULL, "GET", NULL, NULL, false);
+        $emitter = new SocketEmitter("collecter.acme.au", NULL, "GET", NULL, NULL, false);
 
         // Asserts
         $this->assertNotNull($emitter);
     }
 
     public function testFileEmitterInit() {
-        $emitter = new FileEmitter($this->uri, false, "GET", 1, 15, 1);
+        $emitter = new FileEmitter("collecter.acme.au", false, "GET", 1, 15, 1);
 
         // Asserts
         $this->assertNotNull($emitter);
     }
 
     public function testReturnFunctions() {
-        $emitter = new SyncEmitter($this->uri, "http", "GET", 10, false);
+        $emitter = new SyncEmitter("collecter.acme.au", "http", "GET", 10, false);
         $emitter->addEvent(array("something" => "something"));
 
         $this->assertEquals(false,

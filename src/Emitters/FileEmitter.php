@@ -21,15 +21,13 @@
 */
 
 namespace Snowplow\Tracker\Emitters;
-
 use Snowplow\Tracker\Emitter;
 
 class FileEmitter extends Emitter{
     // Emitter Parameters
-    private $log_path = "temp/";
-    private $url;
     private $type;
-    private $root_path;
+    private $url;
+    private $log_dir;
     private $log_file;
 
     // Worker Parameters
@@ -38,26 +36,24 @@ class FileEmitter extends Emitter{
 
     /**
      * Creates a File Emitter
-
+     *
      * @param string $uri
-     * @param bool|null $ssl
+     * @param string|null $protocol
      * @param string|null $type
      * @param int|null $workers
      * @param int|float|null $timeout
      * @param int|null $buffer_size
      */
-    public function __construct($uri, $ssl = false, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size) {
-        $this->type = ($type != NULL) ? $type : "POST";
-        $this->timeout = ($timeout != NULL) ? $timeout : 15;
-        $this->url = $this->getUrl($uri, $ssl);
-        $this->root_path = dirname(dirname(__DIR__));
+    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size) {
+        $this->type     = $this->getRequestType($type);
+        $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
+        $this->log_dir  = dirname(dirname(__DIR__))."/".self::WORKER_FOLDER;
         $this->log_file = $this->initLogFile();
 
-        // Create worker directories and start background workers
-        $workers = ($workers != NULL) ? $workers : 1;
-        $this->initWorkers($workers);
+        // Creates worker directories and starts the background workers
+        $this->initWorkers($workers, $timeout);
 
-        $buffer = ($buffer_size != NULL) ? $buffer_size : 250;
+        $buffer = $buffer_size == NULL ? self::WORKER_BUFFER : $buffer_size;
         $this->setup("curl", false, $buffer);
     }
 
@@ -65,7 +61,7 @@ class FileEmitter extends Emitter{
      * Sends the events log file to a folder being watched by a worker
      *
      * @param array $buffer
-     * @return bool;
+     * @return bool
      */
     public function send($buffer) {
         if (count($buffer) > 0) {
@@ -77,11 +73,11 @@ class FileEmitter extends Emitter{
 
             // Add the file to a worker folder.
             $pos = $this->getWorkerPos();
-            copy($this->log_path."events.log", $this->worker_paths[$pos]."events-".rand().".log");
+            copy($this->log_dir."events.log", $this->worker_paths[$pos]."events-".rand().".log");
 
             // Reset the log and continue...
             $this->reset();
-            return "File Emitter logs to the '/temp/' folder.";
+            return "File Emitter logs have been sent to the '/temp/' folder.";
         }
         return "No events to write.";
     }
@@ -92,58 +88,30 @@ class FileEmitter extends Emitter{
      * @return resource
      */
     private function initLogFile() {
-        if (!is_dir($this->root_path."/".$this->log_path)) {
-            mkdir($this->root_path."/".$this->log_path);
+        if (!is_dir($this->log_dir)) {
+            mkdir($this->log_dir);
         }
-        $this->log_path = $this->root_path."/".$this->log_path;
-        return fopen($this->log_path."/events.log","w");
+        return fopen($this->log_dir."/events.log","w");
     }
 
     /**
      * Does the initial setup for the File Consumer workers
      *
-     * @param int $workers
+     * @param int|null $workers
+     * @param int|null $timeout
      */
-    private function initWorkers($workers) {
+    private function initWorkers($workers, $timeout) {
+        $workers = $workers == NULL ? self::WORKER_COUNT : $workers;
+
+        // Make the log failure directory
+        $this->makeDir($this->log_dir."failed-logs/");
+
+        // Create the workers
         for ($i = 0; $i < $workers; $i++) {
-            $dir = $this->log_path."w".$i."/";
-            $fail_dir = $this->log_path."failed-logs";
-            array_push($this->worker_paths,$dir);
-
-            // Create Functions
+            $dir = $this->log_dir."w".$i."/";
+            array_push($this->worker_paths, $dir);
             $this->makeDir($dir);
-            $this->makeDir($fail_dir);
-            $this->makeWorker($i);
-        }
-    }
-
-    /**
-     * Returns the collector URL
-     *
-     * @param string $uri - Collector URI
-     * @param bool $ssl - If we are using SSL
-     * @return null|string
-     */
-    private function getUrl($uri, $ssl) {
-        $protocol = ($ssl) ? "https" : "http";
-        if ($this->type == "POST") {
-            return $protocol."://".$uri.self::POST_PATH;
-        }
-        else if ($this->type == "GET") {
-            return $protocol."://".$uri."/i";
-        }
-        return NULL;
-    }
-
-    /**
-     * Creates a new directory
-     * - If that directory does not already exist
-     *
-     * @param string $dir
-     */
-    private function makeDir($dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir);
+            $this->makeWorker($i, $timeout);
         }
     }
 
@@ -153,14 +121,27 @@ class FileEmitter extends Emitter{
      * - When it is out of files it will wait until it times out and then close
      *
      * @param int $worker_num
+     * @param int|null $timeout
      */
-    private function makeWorker($worker_num) {
-        chdir($this->root_path);
-        $cmd = "php Worker.php ";
-        $cmd.= "--file_path temp/w".$worker_num."/ ";
-        $cmd.= "--url ".$this->url." ";
-        $cmd.= "--type ".$this->type." ";
-        $cmd.= "--timeout ".$this->timeout;
+    private function makeWorker($worker_num, $timeout) {
+        // Make sure we are in the correct directory level to execute our command
+        chdir(dirname(dirname(__DIR__)));
+
+        // Grab worker settings from Constants class
+        $timeout = $timeout    == NULL   ? self::WORKER_TIMEOUT : $timeout;
+        $window  = $this->type == "POST" ? self::WORKER_WINDOW_POST : self::WORKER_WINDOW_GET;
+        $buffer  = $this->type == "POST" ? self::WORKER_BUFFER_POST : self::WORKER_BUFFER_GET;
+
+        // Make our worker startup command
+        $cmd = "php Worker.php";
+        $cmd.= " --file_path ".self::WORKER_FOLDER."w".$worker_num."/";
+        $cmd.= " --url ".$this->url;
+        $cmd.= " --type ".$this->type;
+        $cmd.= " --timeout ".$timeout;
+        $cmd.= " --window ".$window;
+        $cmd.= " --buffer ".$buffer;
+
+        // Execute command in the background and return
         $this->execInBackground($cmd);
     }
 
@@ -182,7 +163,19 @@ class FileEmitter extends Emitter{
      * Resets the events.log file to empty
      */
     private function reset() {
-        $this->log_file = fopen($this->log_path."/events.log", "w");
+        $this->log_file = fopen($this->log_dir."/events.log", "w");
+    }
+
+    /**
+     * Creates a new directory
+     * - If that directory does not already exist
+     *
+     * @param string $dir
+     */
+    private function makeDir($dir) {
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
     }
 
     /**
@@ -234,8 +227,8 @@ class FileEmitter extends Emitter{
      *
      * @return null|string
      */
-    public function returnFilePath() {
-        return $this->log_path;
+    public function returnLogDir() {
+        return $this->log_dir;
     }
 
     /**
@@ -244,7 +237,7 @@ class FileEmitter extends Emitter{
      * @return string
      */
     public function returnRootPath() {
-        return $this->root_path;
+        return dirname(dirname(__DIR__));
     }
 
     /**
@@ -263,15 +256,5 @@ class FileEmitter extends Emitter{
      */
     public function returnWorkerPaths() {
         return $this->worker_paths;
-    }
-
-    /**
-     * Returns the timeout which the worker stays alive for
-     * - In seconds
-     *
-     * @return float|int|null
-     */
-    public function returnTimeout() {
-        return $this->timeout;
     }
 }

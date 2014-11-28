@@ -19,12 +19,31 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Emitters\FileEmitter;
 use Snowplow\Tracker\Subject;
 
+/**
+ * Tests the functionality of the File emitter
+ */
 class FileEmitterTest extends PHPUnit_Framework_TestCase {
-    private $uri = "5af018b5.ngrok.com";
+
+    // Helper Functions & Values
+
+    private $uri = "localhost:4545";
+
+    private function returnTracker($type) {
+        $subject = new Subject();
+        $emitter = $this->returnFileEmitter($type);
+        return new Tracker($emitter, $subject, NULL, NULL, true);
+    }
+
+    private function returnFileEmitter($type) {
+        return new FileEmitter($this->uri, false, $type, 3, 1, 100);
+    }
+
+    // Tests
 
     public function testFilePostForceFlush() {
         $tracker = $this->returnTracker("POST", false);
@@ -44,12 +63,13 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         }
         $tracker->flushEmitters(true);
 
-        // Will not do anything but just to check
-        // that if we have a file emitter it will not error!
+        // Will not do anything but we need to ensure
+        // that if we have a file emitter it will not 
+        // cause an error.
         $tracker->turnOfDebug(true);
     }
 
-    public function testFilePOST() {
+    public function testFilePost() {
         $tracker = $this->returnTracker("POST", false);
         $tracker->returnSubject()->setNetworkUserId("network-id");
         for ($i = 0; $i < 10; $i++) {
@@ -59,10 +79,11 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testBadType() {
-        $tracker = $this->returnTracker("BAD", false);
+        $tracker = $this->returnTracker("POSTS", false);
         $emitters = $tracker->returnEmitters();
         $emitter = $emitters[0];
-        $this->assertNull($emitter->returnUrl());
+        $this->assertEquals("http://".$this->uri."/com.snowplowanalytics.snowplow/tp2",
+            $emitter->returnUrl());
     }
 
     public function testReturnFunctions() {
@@ -74,11 +95,9 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals("http://".$this->uri."/com.snowplowanalytics.snowplow/tp2",
             $emitter->returnUrl());
         $this->assertEquals($root_dir."/temp/",
-            $emitter->returnFilePath());
+            $emitter->returnLogDir());
         $this->assertEquals(0,
             $emitter->returnWorkerCount());
-        $this->assertEquals(5,
-            $emitter->returnTimeout());
         $this->assertEquals("POST",
             $emitter->returnType());
         $this->assertEquals($root_dir,
@@ -89,15 +108,5 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
             $paths[0]);
         $this->assertEquals($root_dir."/temp/w1/",
             $paths[1]);
-    }
-
-    private function returnTracker($type) {
-        $subject = new Subject();
-        $emitter = $this->returnFileEmitter($type);
-        return new Tracker($emitter, $subject, NULL, NULL, true);
-    }
-
-    private function returnFileEmitter($type) {
-        return new FileEmitter($this->uri, false, $type, 3, 5, 100);
     }
 }
