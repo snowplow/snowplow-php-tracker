@@ -40,7 +40,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     }
 
     private function returnFileEmitter($type) {
-        return new FileEmitter($this->uri, false, $type, 3, 1, 100);
+        return new FileEmitter($this->uri, false, $type, 3, 3, 100);
     }
 
     // Tests
@@ -72,7 +72,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     public function testFilePost() {
         $tracker = $this->returnTracker("POST", false);
         $tracker->returnSubject()->setNetworkUserId("network-id");
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);

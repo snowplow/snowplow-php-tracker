@@ -108,7 +108,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testCurlPost() {
         $tracker = $this->returnTracker("POST", true, $this->uri);
-        for ($i = 0; $i < 100; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(false);

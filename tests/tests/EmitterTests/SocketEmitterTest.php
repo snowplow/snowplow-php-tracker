@@ -54,32 +54,6 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
     // Tests
 
-    public function testSocketPostBadUri() {
-        $tracker = $this->returnTracker("POST", true, "collector.ngrok.com");
-        $tracker->flushEmitters(true);
-        for ($i = 0; $i < 1; $i++) {
-            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        }
-        $tracker->flushEmitters(true);
-
-        //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
-    }
-
-    public function testSocketGetBadUri() {
-        $tracker = $this->returnTracker("GET", true, "collector.ngrok.com");
-        $tracker->flushEmitters(true);
-        for ($i = 0; $i < 1; $i++) {
-            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        }
-        $tracker->flushEmitters(true);
-
-        //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
-    }
-
     public function testSocketDebugGet() {
         $tracker = $this->returnTracker("GET", true, $this->uri);
         $tracker->flushEmitters(true);
