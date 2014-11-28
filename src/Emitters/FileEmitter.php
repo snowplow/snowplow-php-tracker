@@ -88,9 +88,7 @@ class FileEmitter extends Emitter{
      * @return resource
      */
     private function initLogFile() {
-        if (!is_dir($this->log_dir)) {
-            mkdir($this->log_dir);
-        }
+        $this->makeDir($this->log_dir);
         return fopen($this->log_dir."/events.log","w");
     }
 
@@ -167,21 +165,10 @@ class FileEmitter extends Emitter{
     }
 
     /**
-     * Creates a new directory
-     * - If that directory does not already exist
-     *
-     * @param string $dir
-     */
-    private function makeDir($dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir);
-        }
-    }
-
-    /**
      * Creates a command which does not wait for any response.
      * - Essentially sends any response into the abyss
      * - Makes the background process non blocking
+     * - Will work for both Windows and linux systems
      *
      * @param $cmd
      */
@@ -196,7 +183,8 @@ class FileEmitter extends Emitter{
 
     /**
      * Disables debug mode
-     * - Function is here to prevent errors when passing a global debug shutdown
+     * - Function is here to prevent errors when passing a 
+     *   global debug shutdown
      */
     public function turnOfDebug() {
         return "File Emitter does not have a debug mode yet!";
@@ -229,15 +217,6 @@ class FileEmitter extends Emitter{
      */
     public function returnLogDir() {
         return $this->log_dir;
-    }
-
-    /**
-     * Returns the root path of the project
-     *
-     * @return string
-     */
-    public function returnRootPath() {
-        return dirname(dirname(__DIR__));
     }
 
     /**
