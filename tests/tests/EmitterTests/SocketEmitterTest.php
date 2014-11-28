@@ -33,18 +33,18 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
     private $uri = "localhost:4545";
 
-    private function requestResultAssert($emitters) {
+    private function requestResultAssert($emitters, $code) {
         foreach($emitters as $emitter) {
             $results = $emitter->returnRequestResults();
             foreach ($results as $result) {
-                $this->assertEquals(200, $result["code"]);
+                $this->assertEquals($code, $result["code"]);
             }
         }
     }
 
-    private function returnTracker($type, $debug) {
+    private function returnTracker($type, $debug, $uri) {
         $subject = new Subject();
-        $e1 = $this->returnSocketEmitter($type, $this->uri, $debug);
+        $e1 = $this->returnSocketEmitter($type, $uri, $debug);
         return new Tracker($e1, $subject, NULL, NULL, true);
     }
 
@@ -54,50 +54,60 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
     // Tests
 
-    public function testSocketForceFlushGet() {
-        $tracker = $this->returnTracker("GET", false);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
+    public function testSocketPostBadUri() {
+        $tracker = $this->returnTracker("POST", true, "collector.ngrok.com");
         $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $tracker->turnOfDebug(true);
     }
 
-    public function testSocketForceFlushPost() {
-        $tracker = $this->returnTracker("POST", false);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
+    public function testSocketGetBadUri() {
+        $tracker = $this->returnTracker("GET", true, "collector.ngrok.com");
         $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $tracker->turnOfDebug(true);
     }
 
     public function testSocketDebugGet() {
-        $tracker = $this->returnTracker("GET", true);
+        $tracker = $this->returnTracker("GET", true, $this->uri);
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters());
+        $this->requestResultAssert($tracker->returnEmitters(), 200);
+        $tracker->turnOfDebug(true);
     }
 
     public function testSocketDebugPost() {
-        $tracker = $this->returnTracker("POST", true);
+        $tracker = $this->returnTracker("POST", true, $this->uri);
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters());
+        $this->requestResultAssert($tracker->returnEmitters(), 200);
+        $tracker->turnOfDebug(true);
     }
 
     public function testReturnFunctions() {
-        $tracker = $this->returnTracker("GET", false);
+        $tracker = $this->returnTracker("GET", false, $this->uri);
         $emitters = $tracker->returnEmitters();
         $emitter = $emitters[0];
 

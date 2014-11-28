@@ -31,20 +31,20 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
     // Helper Functions & Values
 
-    private $uri    = "localhost:4545";
+    private $uri = "localhost:4545";
 
-    private function requestResultAssert($emitters) {
+    private function requestResultAssert($emitters, $code) {
         foreach($emitters as $emitter) {
             $results = $emitter->returnRequestResults();
             foreach ($results as $result) {
-                $this->assertEquals(200, $result["code"]);
+                $this->assertEquals($code, $result["code"]);
             }
         }
     }
 
-    private function returnTracker($type, $debug) {
+    private function returnTracker($type, $debug, $uri) {
         $subject = new Subject();
-        $e1 = $this->returnSyncEmitter($type, $this->uri, $debug);
+        $e1 = $this->returnSyncEmitter($type, $uri, $debug);
         return new Tracker($e1, $subject, NULL, NULL, true);
     }
 
@@ -54,44 +54,56 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
     // Tests
 
-    public function testSyncForceFlushGet() {
-        $tracker = $this->returnTracker("GET", false);
+    public function testSyncPostBadUri() {
+        $tracker = $this->returnTracker("POST", true, "collector.acme.au");
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $tracker->turnOfDebug(true);
     }
 
-    public function testSyncForceFlushPost() {
-        $tracker = $this->returnTracker("POST", false);
+    public function testSyncGetBadUri() {
+        $tracker = $this->returnTracker("GET", true, "collector.acme.au");
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $tracker->turnOfDebug(true);
     }
 
     public function testSyncPostDebug() {
-        $tracker = $this->returnTracker("POST", true);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
+        $tracker = $this->returnTracker("POST", true, $this->uri);
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters());
+        $this->requestResultAssert($tracker->returnEmitters(), 200);
+        $tracker->turnOfDebug(true);
     }
 
     public function testSyncGetDebug() {
-        $tracker = $this->returnTracker("GET", true);
-        $tracker->returnSubject()->setNetworkUserId("network-id");
+        $tracker = $this->returnTracker("GET", true, $this->uri);
+        $tracker->flushEmitters(true);
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters(true);
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters());
+        $this->requestResultAssert($tracker->returnEmitters(), 200);
+        $tracker->turnOfDebug(true);
     }
 
     public function testSyncBadType() {

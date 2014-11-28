@@ -100,8 +100,6 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
             $emitter->returnWorkerCount());
         $this->assertEquals("POST",
             $emitter->returnType());
-        $this->assertEquals($root_dir,
-            $emitter->returnRootPath());
 
         $paths = $emitter->returnWorkerPaths();
         $this->assertEquals($root_dir."/temp/w0/",
