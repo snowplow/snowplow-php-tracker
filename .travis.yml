@@ -14,7 +14,7 @@ install:
   - npm install -g mountebank --production
 
 before_script:
-  - ./mb
+  - mb
   - curl -i -X POST -H 'Content-Type: application/json' -d@tests/mountebank_mocks/imposter.json http://localhost:2525/imposters
   - composer self-update
   - composer install
