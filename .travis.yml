@@ -15,11 +15,12 @@ install:
 
 before_script:
   - mb &
-  - curl -i -X POST -H 'Content-Type: application/json' -d@tests/mountebank_mocks/imposter.json http://localhost:2525/imposters
   - composer self-update
   - composer install
 
 script:
+  - ls
+  - "curl -X POST -d @tests/mountebank_mocks/imposter.json http://localhost:2525/imposters"
   - phpunit
 
 after_script:
