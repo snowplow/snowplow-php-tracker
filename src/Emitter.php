@@ -29,7 +29,7 @@ class Emitter extends Constants {
     private $buffer = array();
 
     // Debug Parameters
-    private $debug_mode = false;
+    private $debug_mode;
     private $debug_file;
     private $path;
 
@@ -149,6 +149,18 @@ class Emitter extends Constants {
         }
     }
 
+    /**
+     * Creates a new directory if the supplied directory path does
+     * not exists already.
+     *
+     * @param string $dir
+     */
+    public function makeDir($dir) {
+        if (!is_dir($dir)) {
+            mkdir($dir);
+        }
+    }
+
     // Return Functions
     /**
      * Returns the buffer_size
@@ -210,9 +222,7 @@ class Emitter extends Constants {
      */
     private function initDebugLogFiles($id, $type) {
         $debug_dir = dirname(__DIR__)."/debug";
-        if (!is_dir($debug_dir)) {
-            mkdir($debug_dir);
-        }
+        $this->makeDir($debug_dir);
         $this->path = $debug_dir."/".$type."-events-log-".$id.".log";
         $this->debug_file = fopen($this->path,"w");
     }
