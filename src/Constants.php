@@ -26,7 +26,7 @@ namespace Snowplow\Tracker;
  * Contains all of the constants needed for the PHP Tracker.
  */
 class Constants {
-	/**
+    /**
      * Settings for the PHP Tracker
      * - Version: the current version of the PHP Tracker
      * - Base64: whether or not we will encode events in Base64 before sending
@@ -43,7 +43,7 @@ class Constants {
      * - SSL: the default for whether or not to use SSL Encryption
      * - Type: the default for what type of request the emitter will be making (POST or GET)
      */
-	const TRACKER_VERSION       = "php-0.2.0";
+    const TRACKER_VERSION       = "php-0.2.0";
     const DEFAULT_BASE_64       = true;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
     const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
@@ -71,7 +71,6 @@ class Constants {
      */
     const SOCKET_BUFFER  = 50;
     const SOCKET_TIMEOUT = 30;
-
 
     /**
      * Settings for the Asynchronous Rolling Curl Emitter

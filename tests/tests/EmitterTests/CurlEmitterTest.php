@@ -66,7 +66,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testCurlGetBadUri() {
@@ -79,7 +79,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testCurlDebugGet() {
@@ -91,7 +91,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testCurlDebugPost() {
@@ -103,7 +103,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testCurlPost() {
@@ -115,7 +115,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testBadType() {

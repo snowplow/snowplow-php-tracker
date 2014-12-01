@@ -23,14 +23,17 @@
 namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
 
-class FileEmitter extends Emitter{
+class FileEmitter extends Emitter {
+    
     // Emitter Parameters
+
     private $type;
     private $url;
     private $log_dir;
     private $log_file;
 
     // Worker Parameters
+    
     private $worker = 0;
     private $worker_paths = array();
 
@@ -168,7 +171,7 @@ class FileEmitter extends Emitter{
      * Creates a command which does not wait for any response.
      * - Essentially sends any response into the abyss
      * - Makes the background process non blocking
-     * - Will work for both Windows and linux systems
+     * - Will work for both Windows and Linux systems
      *
      * @param $cmd
      */
@@ -186,11 +189,12 @@ class FileEmitter extends Emitter{
      * - Function is here to prevent errors when passing a 
      *   global debug shutdown
      */
-    public function turnOfDebug() {
+    public function turnOffDebug() {
         return "File Emitter does not have a debug mode yet!";
     }
 
     // File Return Functions
+
     /**
      * Returns the collector url
      *

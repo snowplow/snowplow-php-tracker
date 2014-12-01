@@ -23,13 +23,15 @@
 namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
 
-class CurlEmitter extends Emitter{
+class CurlEmitter extends Emitter {
 
     // Emitter Parameters
+
     private $type;
     private $url;
 
     // Curl Specific Parameters
+
     private $curl_buffer = array();
     private $curl_limit;
     private $rolling_window;
@@ -49,7 +51,7 @@ class CurlEmitter extends Emitter{
         $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
         $this->rolling_window = $this->type == "POST" ? self::CURL_WINDOW_POST : self::CURL_WINDOW_GET;
 
-        // If Debug is on create a requests_results
+        // If debug is on create a requests_results
         $this->debug = $debug;
         if ($debug == true) {
             $this->debug = true;
@@ -223,7 +225,7 @@ class CurlEmitter extends Emitter{
      *
      * @param bool $deleteLocal - Empty results array
      */
-    public function turnOfDebug($deleteLocal) {
+    public function turnOffDebug($deleteLocal) {
         $this->debug = false;
         if ($deleteLocal) {
             $this->requests_results = array();
@@ -234,6 +236,7 @@ class CurlEmitter extends Emitter{
     }
 
     // Curl Return Functions
+
     /**
      * Returns the collector url
      *
@@ -280,6 +283,7 @@ class CurlEmitter extends Emitter{
     }
 
     // Debug Functions
+
     /**
      * Returns the array of stored results from a request
      *

@@ -20,11 +20,13 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 namespace Snowplow\Tracker;
 
 class Tracker extends Constants {
 
     // Tracker Parameters
+    
     private $subject;
     private $emitters;
     private $encode_base64;
@@ -65,6 +67,7 @@ class Tracker extends Constants {
     }
 
     // Setter Functions
+    
     /**
      * Updates the subject of the tracker with a new subject
      *
@@ -84,6 +87,7 @@ class Tracker extends Constants {
     }
 
     // Emitter Send Functions
+
     /**
      * Sends the Payload arrays to the emitter for processing
      * Converts all values within the array into string values before sending
@@ -110,17 +114,18 @@ class Tracker extends Constants {
     }
 
     /**
-     * Will turn of debugging for all emitters
+     * Will turn off debugging for all emitters
      *
      * @param bool $deleteLocal - Will also delete all local information stored.
      */
-    public function turnOfDebug($deleteLocal = false) {
+    public function turnOffDebug($deleteLocal = false) {
         foreach($this->emitters as $emitter) {
-            $emitter->turnOfDebug($deleteLocal);
+            $emitter->turnOffDebug($deleteLocal);
         }
     }
 
     // Return Functions
+
     /**
      * Takes a Payload object as a parameter and appends all necessary event data to it
      * Appends the following: subject, unique id, context, tracker standard pairs
@@ -146,7 +151,7 @@ class Tracker extends Constants {
      * @return string - Unique String based on the time of creation
      */
     private function generateUuid() {
-        return uniqid("",true);
+        return uniqid("", true);
     }
 
     /**
@@ -166,6 +171,7 @@ class Tracker extends Constants {
     }
 
     // Tracking Functions
+
     /**
      * Takes a Payload and a Context and forwards the finalised payload array to the sendRequest function.
      *
@@ -323,6 +329,7 @@ class Tracker extends Constants {
     }
 
     // Tracker Parameter Return Functions
+
     /**
      * Returns the Trackers Subject
      *

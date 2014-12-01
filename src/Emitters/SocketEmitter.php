@@ -24,15 +24,17 @@ namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
 use Exception;
 
-class SocketEmitter extends Emitter{
+class SocketEmitter extends Emitter {
     
     // Emitter Parameters
+
     private $uri;
     private $ssl;
     private $type;
     private $timeout;
 
     // Socket Parameters
+
     private $socket_failed = false;
     private $socket;
 
@@ -52,7 +54,7 @@ class SocketEmitter extends Emitter{
         $this->ssl     = $ssl == NULL ? self::DEFAULT_SSL : (bool) $ssl;
         $this->timeout = $timeout == NULL ? self::SOCKET_TIMEOUT : $timeout;
 
-        // If Debug is on create a requests_results
+        // If debug is on create a requests_results
         $this->debug = $debug;
         if ($debug == true) {
             $this->debug = true;
@@ -249,17 +251,18 @@ class SocketEmitter extends Emitter{
      *
      * @param bool $deleteLocal - Empty results array
      */
-    public function turnOfDebug($deleteLocal) {
+    public function turnOffDebug($deleteLocal) {
         $this->debug = false;
         if ($deleteLocal) {
             $this->requests_results = array();
         }
 
-        // Switch Debug off in Base Emitter Class
+        // Switch debug off in Base Emitter Class
         $this->debugSwitch($deleteLocal);
     }
 
-    // Socket Parameter Return Functions
+    // Socket Return Functions
+
     /**
      * Returns the collectors uri
      *
@@ -315,6 +318,7 @@ class SocketEmitter extends Emitter{
     }
 
     // Debug Functions
+
     /**
      * Returns the results array which contains all response codes and body payloads.
      *

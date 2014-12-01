@@ -20,11 +20,13 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 namespace Snowplow\Tracker;
 
 class Subject extends Constants {
 
     // Subject Parameters
+
     private $tracker_settings;
 
     /**
@@ -44,6 +46,7 @@ class Subject extends Constants {
     }
 
     // Setter Functions
+
     /**
      * Sets the platform from which the event is fired
      *
@@ -146,6 +149,7 @@ class Subject extends Constants {
     }
 
     // Subject Return Functions
+    
     public function returnTrackerSettings() {
         return $this->tracker_settings;
     }

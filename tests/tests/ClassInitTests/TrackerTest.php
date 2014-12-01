@@ -58,7 +58,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($this->s1, $tracker->returnSubject());
         $this->assertEquals(false, $tracker->returnEncodeBase64());
         $this->assertEquals(array("tv" => "php-0.2.0", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testTrackerInitEmitterArray() {
@@ -69,7 +69,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         $emitters = $tracker->returnEmitters();
         $this->assertEquals($emitters[0], $this->e1);
         $this->assertEquals($emitters[1], $this->e2);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testTrackerChangeSubject() {
@@ -96,7 +96,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
 
         // Assert - 3
         $this->assertEquals("127.10.0.1", $uid["ip"]);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testTrackerAddEmitterAfter() {
@@ -105,6 +105,6 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
 
         // Assert
         $this->assertEquals(2, count($tracker->returnEmitters()));
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 }

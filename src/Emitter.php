@@ -20,15 +20,18 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 namespace Snowplow\Tracker;
 
 class Emitter extends Constants {
 
     // Emitter Parameters
+
     private $buffer_size;
     private $buffer = array();
 
     // Debug Parameters
+
     private $debug_mode;
     private $debug_file;
     private $path;
@@ -101,9 +104,8 @@ class Emitter extends Constants {
     }
 
     /**
-     * Turns of debug_mode for the emitter
-     * - Closes the log resource
-     * - Sends a command to stop logging local information in sub emitter classes.
+     * Turns off debug_mode for the emitter
+     * - Closes and deletes the log resource
      *
      * @param bool $deleteLocal - Delete all local information
      */
@@ -144,7 +146,6 @@ class Emitter extends Constants {
         switch ($type) {
             case "POST" : return $type;
             case "GET"  : return $type;
-            case NULL   : return self::DEFAULT_REQ_TYPE;
             default     : return self::DEFAULT_REQ_TYPE;
         }
     }
@@ -162,6 +163,7 @@ class Emitter extends Constants {
     }
 
     // Return Functions
+
     /**
      * Returns the buffer_size
      *
@@ -180,7 +182,6 @@ class Emitter extends Constants {
         return $this->buffer;
     }
 
-    // Make Functions
     /**
      * Returns a boolean of if debug mode is on or not
      *
@@ -199,7 +200,8 @@ class Emitter extends Constants {
         return $this->debug_file;
     }
 
-    // Debug Setup
+    // Debug Functions
+
     /**
      * Initialize Debug Logging Paths and Files
      *

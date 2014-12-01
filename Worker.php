@@ -21,9 +21,11 @@
 */
 
 // Parse Arguments from command line
+
 $args = parse($argv);
 
 // Check that all of the parameters were set
+
 if (!isset($args["type"])) {
     die("--type must be given");
 }
@@ -44,6 +46,7 @@ if (!isset($args["buffer"])) {
 }
 
 // Worker Parameters
+
 $type           = $args["type"];
 $dir            = $args["file_path"];
 $url            = $args["url"];
@@ -52,6 +55,7 @@ $buffer_size    = $args["buffer"];
 $rolling_window = $args["window"];
 
 // Worker Loop
+
 $loop = true;
 $count = 0;
 
@@ -87,11 +91,11 @@ while ($loop && $count < 5) {
 }
 
 // Exit when there are no more files or time limit reached
+
 exit(0);
 
 //--- Functions ---//
 
-// Return an events log for the worker
 /**
  * Get an events log from the workers folder
  *
@@ -203,6 +207,7 @@ function consumeFile($url, $file, $type, $buffer_size) {
 }
 
 // Worker Functions
+
 /**
  * Creates a GET or POST curl resource
  *

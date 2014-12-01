@@ -64,7 +64,7 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testSocketDebugPost() {
@@ -77,7 +77,7 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testReturnFunctions() {

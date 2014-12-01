@@ -28,6 +28,7 @@ use Exception;
 class SyncEmitter extends Emitter {
     
     // Emitter Parameters
+    
     private $type;
     private $url;
 
@@ -44,7 +45,7 @@ class SyncEmitter extends Emitter {
         $this->type = $this->getRequestType($type);
         $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
 
-        // If Debug is on create a requests_results
+        // If debug is on create a requests_results
         $this->debug = $debug;
         if ($debug == true) {
             $this->debug = true;
@@ -86,6 +87,7 @@ class SyncEmitter extends Emitter {
     }
 
     // Send Functions
+
     /**
      * Using a GET Request sends the data to a collector
      *
@@ -148,7 +150,7 @@ class SyncEmitter extends Emitter {
      *
      * @param bool $deleteLocal - Empty results array
      */
-    public function turnOfDebug($deleteLocal) {
+    public function turnOffDebug($deleteLocal) {
         $this->debug = false;
         if ($deleteLocal) {
             $this->requests_results = array();
@@ -159,6 +161,7 @@ class SyncEmitter extends Emitter {
     }
 
     // Return Functions
+
     /**
      * Returns an array which has been formatted to be ready for a POST Request
      *
@@ -171,6 +174,7 @@ class SyncEmitter extends Emitter {
     }
 
     // Sync Return Functions
+
     /**
      * Returns the Emitter Collector URL
      *
@@ -190,6 +194,7 @@ class SyncEmitter extends Emitter {
     }
 
     // Debug Functions
+
     /**
      * Returns the array of stored results from a request
      *

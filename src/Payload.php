@@ -20,11 +20,13 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 namespace Snowplow\Tracker;
 
 class Payload extends Constants {
     
     // Payload Parameters
+    
     private $nv_pairs;
 
     /**

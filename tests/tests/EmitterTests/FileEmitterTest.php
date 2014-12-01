@@ -66,7 +66,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         // Will not do anything but we need to ensure
         // that if we have a file emitter it will not 
         // cause an error.
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testFilePost() {

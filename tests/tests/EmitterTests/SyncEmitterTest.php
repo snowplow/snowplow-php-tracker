@@ -64,7 +64,7 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testSyncGetBadUri() {
@@ -77,7 +77,7 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testSyncPostDebug() {
@@ -90,7 +90,7 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testSyncGetDebug() {
@@ -103,7 +103,7 @@ class SyncEmitterTest extends PHPUnit_Framework_TestCase {
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
-        $tracker->turnOfDebug(true);
+        $tracker->turnOffDebug(true);
     }
 
     public function testSyncBadType() {
