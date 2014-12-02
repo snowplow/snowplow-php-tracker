@@ -58,11 +58,11 @@ class Emitter extends Constants {
      * Sends the buffer to the configured emitter for sending
      *
      * @param array $buffer
-     * @param bool $force
+     * @param bool $flush
      */
-    private function flush($buffer, $force = false) {
-        if (count($buffer) > 0 || $force) {
-            $res = $this->send($buffer, $force);
+    private function flush($buffer, $flush = false) {
+        if (count($buffer) > 0) {
+            $res = $this->send($buffer, $flush);
             if (is_bool($res) && $res) {
                 if ($this->debug_mode) {
                     fwrite($this->debug_file,"Emitter sent payload successfully\n");
@@ -95,12 +95,12 @@ class Emitter extends Constants {
     }
 
     /**
-     * Force sends all current buffers to the collector
+     * Sends all events in the buffer to the collector
      *
      * @param bool $force
      */
-    public function forceFlush($force = false) {
-        $this->flush($this->buffer, $force);
+    public function forceFlush() {
+        $this->flush($this->buffer, true);
     }
 
     /**
