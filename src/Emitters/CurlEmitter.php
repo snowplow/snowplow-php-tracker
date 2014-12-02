@@ -104,7 +104,7 @@ class CurlEmitter extends Emitter {
         }
         else if ($curl_send === true) {
             if (count($this->curl_buffer) > 0) {
-                return $this->rollingCurl($this->curl_buffer ,$debug);
+                return $this->rollingCurl($this->curl_buffer, $debug);
             }
             else {
                 return "Error: No curls to send.";
