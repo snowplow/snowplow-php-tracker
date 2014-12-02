@@ -76,19 +76,27 @@ class Emitter extends Constants {
         if (count($buffer) > 0) {
             $res = $this->send($buffer, $curl_send);
             if (is_bool($res) && $res) {
+                $success_string = "Payload sent successfully\nPayload: ".json_encode($buffer)."\n\n";
                 if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
-                    fwrite($this->debug_file,"Emitter sent payload successfully\n");
+                    if ($this->writeToFile($this->debug_file, $success_string) !== true) {
+                        print_r($success_string);
+                        $this->write_perms = false;
+                    }
                 }
                 else if ($this->debug_mode) {
-                    print_r("Emitter sent payload successfully\n");
+                    print_r($success_string);
                 }
             }
             else {
+                $error_string = $res."\nPayload: ".json_encode($buffer)."\n\n";
                 if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
-                    fwrite($this->debug_file,$res."\nPayload: ".json_encode($buffer)."\n\n");
+                    if ($this->writeToFile($this->debug_file, $error_string) !== true) {
+                        print_r($error_string);
+                        $this->write_perms = false;
+                    }
                 }
                 else if ($this->debug_mode) {
-                    print_r($res."\nPayload: ".json_encode($buffer)."\n\n");
+                    print_r($error_string);
                 }
             }
             $this->buffer = array();
@@ -131,9 +139,11 @@ class Emitter extends Constants {
             // Turn off debug_mode
             $this->debug_mode = false;
 
-            if (self::DEBUG_LOG_FILES) {
-                fclose($this->debug_file);
-                
+            // If log files and write permissions are both true
+            if (self::DEBUG_LOG_FILES && 
+                $this->write_perms &&
+                $this->closeFile($this->debug_file)) {
+
                 // If set to true delete the log file as well
                 if ($deleteLocal) {
                     unlink($this->path);
@@ -220,7 +230,7 @@ class Emitter extends Constants {
         } catch (Exception $e) {
             return false;
         }
-    }
+    } 
 
     /**
      * Attempts to copy a file to a new directory
