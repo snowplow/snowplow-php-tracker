@@ -139,7 +139,7 @@ class Emitter extends Constants {
             // Turn off debug_mode
             $this->debug_mode = false;
 
-            // If log files and write permissions are both true
+            // If log files, write permissions and closure of file resource are all true
             if (self::DEBUG_LOG_FILES && 
                 $this->write_perms &&
                 $this->closeFile($this->debug_file)) {
