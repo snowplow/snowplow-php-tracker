@@ -47,7 +47,7 @@ class Constants {
      */
     const TRACKER_VERSION       = "php-0.2.0";
     const DEFAULT_BASE_64       = true;
-    const DEBUG_LOG_FILES       = false;
+    const DEBUG_LOG_FILES       = true;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
     const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
     const SCREEN_VIEW_SCHEMA    = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
