@@ -47,8 +47,9 @@ class FileEmitter extends Emitter {
      * @param int|null $workers
      * @param int|float|null $timeout
      * @param int|null $buffer_size
+     * @param bool|null $debug
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false) {
         $this->type     = $this->getRequestType($type);
         $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->log_dir  = dirname(dirname(__DIR__))."/".self::WORKER_FOLDER;
@@ -79,14 +80,14 @@ class FileEmitter extends Emitter {
             foreach ($buffer as $event) {
                 if ($this->writeToFile($this->log_file, json_encode($event)."\n") !== true) {
                     $this->write_perms = false;
-                    return "Error: to write events to log file.";
+                    return "Error: Unable to write events to log file.";
                 }
             }
 
             // Close the log file so it can be copied
             if ($this->closeFile($this->log_file) !== true) {
                 $this->write_perms = false;
-                return "Error: to close events log file.";
+                return "Error: Unable to close events log file.";
             }
 
             // Add the file to a worker folder.
