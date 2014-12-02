@@ -45,11 +45,13 @@ class SyncEmitter extends Emitter {
         $this->type = $this->getRequestType($type);
         $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
 
-        // If debug is on create a requests_results
-        $this->debug = $debug;
-        if ($debug == true) {
+        // If debug is on create a requests_results array
+        if ($debug === true) {
             $this->debug = true;
             $this->requests_results = array();
+        }
+        else {
+            $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::SYNC_BUFFER : $buffer_size;
         $this->setup("sync", $debug, $buffer);

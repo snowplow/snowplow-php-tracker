@@ -54,11 +54,13 @@ class SocketEmitter extends Emitter {
         $this->ssl     = $ssl == NULL ? self::DEFAULT_SSL : (bool) $ssl;
         $this->timeout = $timeout == NULL ? self::SOCKET_TIMEOUT : $timeout;
 
-        // If debug is on create a requests_results
-        $this->debug = $debug;
-        if ($debug == true) {
+        // If debug is on create a requests_results array
+        if ($debug === true) {
             $this->debug = true;
             $this->requests_results = array();
+        }
+        else {
+            $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::SOCKET_BUFFER : $buffer_size;
         $this->setup("socket", $debug, $buffer);

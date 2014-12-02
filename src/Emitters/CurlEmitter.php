@@ -51,12 +51,14 @@ class CurlEmitter extends Emitter {
         $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
         $this->rolling_window = $this->type == "POST" ? self::CURL_WINDOW_POST : self::CURL_WINDOW_GET;
 
-        // If debug is on create a requests_results
-        $this->debug = $debug;
-        if ($debug == true) {
+        // If debug is on create a requests_results array
+        if ($debug === true) {
             $this->debug = true;
             $this->debug_payloads = array();
             $this->requests_results = array();
+        }
+        else {
+            $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::CURL_BUFFER : $buffer_size;
         $this->setup("curl", $debug, $buffer);
@@ -105,11 +107,10 @@ class CurlEmitter extends Emitter {
                 return $this->rollingCurl($this->curl_buffer ,$debug);
             }
             else {
-                return "No curls to send!";
+                return "Error: No curls to send.";
             }
         }
-
-        return "Still adding to the curl buffer: count ".count($this->curl_buffer)." - limit ".$this->curl_limit;
+        return "Error: Still adding to the curl buffer; count ".count($this->curl_buffer)." - limit ".$this->curl_limit;
     }
 
     /**
