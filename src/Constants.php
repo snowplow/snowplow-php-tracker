@@ -30,6 +30,8 @@ class Constants {
      * Settings for the PHP Tracker
      * - Version: the current version of the PHP Tracker
      * - Base64: whether or not we will encode events in Base64 before sending
+     * - Debug Log Files: whether or not debug stores physical log files
+     *                    if set to false all debug messages will appear in the console
      * - Context: the schema path for a custom-context
      * - Unstruct: the schema path for an unstructured event
      * - Screen View: the schema path for a custom screen view event
@@ -45,6 +47,7 @@ class Constants {
      */
     const TRACKER_VERSION       = "php-0.2.0";
     const DEFAULT_BASE_64       = true;
+    const DEBUG_LOG_FILES       = false;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
     const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
     const SCREEN_VIEW_SCHEMA    = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
