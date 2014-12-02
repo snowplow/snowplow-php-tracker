@@ -33,6 +33,7 @@ class Emitter extends Constants {
     // Debug Parameters
 
     private $debug_mode;
+    private $write_perms = true;
     private $debug_file;
     private $path;
 
@@ -48,9 +49,19 @@ class Emitter extends Constants {
      */
     public function setup($type, $debug, $buffer_size) {
         $this->buffer_size = $buffer_size;
-        $this->debug_mode = $debug;
-        if ($this->debug_mode) {
-            $this->initDebug($type);
+        if ($debug === true) {
+            $this->debug_mode = true;
+
+            // If physical logging is set to true
+            if (self::DEBUG_LOG_FILES) {
+                if ($this->initDebug($type) !== true) {
+                    $this->write_perms = false;
+                    print_r("Unable to create debug log files: likely cause; invalid write permissions.");
+                }
+            }
+        }
+        else {
+            $this->debug_mode = false;
         }
     }
 
@@ -65,13 +76,19 @@ class Emitter extends Constants {
         if (count($buffer) > 0) {
             $res = $this->send($buffer, $curl_send);
             if (is_bool($res) && $res) {
-                if ($this->debug_mode) {
+                if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
                     fwrite($this->debug_file,"Emitter sent payload successfully\n");
+                }
+                else if ($this->debug_mode) {
+                    print_r("Emitter sent payload successfully\n");
                 }
             }
             else {
-                if ($this->debug_mode) {
+                if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
                     fwrite($this->debug_file,$res."\nPayload: ".json_encode($buffer)."\n\n");
+                }
+                else if ($this->debug_mode) {
+                    print_r($res."\nPayload: ".json_encode($buffer)."\n\n");
                 }
             }
             $this->buffer = array();
@@ -109,10 +126,19 @@ class Emitter extends Constants {
      * @param bool $deleteLocal - Delete all local information
      */
     public function debugSwitch($deleteLocal) {
-        $this->debug_mode = false;
-        fclose($this->debug_file);
-        if ($deleteLocal) {
-            unlink($this->path);
+        if ($this->debug_mode === true) {
+
+            // Turn off debug_mode
+            $this->debug_mode = false;
+
+            if (self::DEBUG_LOG_FILES) {
+                fclose($this->debug_file);
+                
+                // If set to true delete the log file as well
+                if ($deleteLocal) {
+                    unlink($this->path);
+                }
+            }
         }
     }
 
@@ -153,11 +179,78 @@ class Emitter extends Constants {
      * Creates a new directory if the supplied directory path does
      * not exists already.
      *
-     * @param string $dir
+     * @param string $dir - The directory we want to make
+     * @return bool - Boolean describing if the creation was a success
      */
     public function makeDir($dir) {
-        if (!is_dir($dir)) {
-            mkdir($dir);
+        try {
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Attempts to return an opened file resource that can be written to
+     *
+     * @param string $file_path - The path to the file we want to write to
+     * @return bool|resource - Either a file resource or a false boolean
+     */
+    public function openFile($file_path) {
+        try {
+            return fopen($file_path, "w");
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Attempts to close an open file resource
+     *
+     * @param string $file_path - The path to the file we want to close
+     * @return bool|resource - Whether or not the close was a success
+     */
+    public function closeFile($file_path) {
+        try {
+            fclose($file_path);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Attempts to copy a file to a new directory
+     *
+     * @param string $path_from - The path to the file we want to copy
+     * @param string $path_to - The path which we want to copt the file to
+     * @return bool|resource - Whether or not the copy was a success
+     */
+    public function copyFile($path_from, $path_to) {
+        try {
+            copy($path_from, $path_to);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Attempts to write a string to a file
+     *
+     * @param string $file_path - The path of the file we want to write to
+     * @param string $content - The content we want to write into the file
+     * @return bool - If the write was successful or not
+     */
+    public function writeToFile($file_path, $content) {
+        try {
+            fwrite($file_path, $content);
+            return true;
+        } catch (Exception $e) {
+            return false;
         }
     }
 
@@ -209,10 +302,13 @@ class Emitter extends Constants {
     private function initDebug($emitter_type) {
         $this->debug_mode = true;
         $id = uniqid("", true);
-        $this->initDebugLogFiles($id, $emitter_type);
-        fwrite($this->debug_file, "Event Log File\n");
-        fwrite($this->debug_file, "Emitter: ".$emitter_type."\n");
-        fwrite($this->debug_file, "ID: ".$id."\n\n");
+
+        // If the debug files were created successfully...
+        if ($this->initDebugLogFiles($id, $emitter_type) === true) {
+            $debug_header = "Event Log File\nEmitter: ".$emitter_type."\nID: ".$id."\n\n";
+            return $this->writeToFile($this->debug_file, $debug_header);
+        }
+        return false;
     }
 
     /**
@@ -220,11 +316,19 @@ class Emitter extends Constants {
      *
      * @param string $id - Random id for the log file
      * @param string $type - Type of emitter we are logging for
+     * @return bool - Whether or not debug file init was successful
      */
     private function initDebugLogFiles($id, $type) {
         $debug_dir = dirname(__DIR__)."/debug";
-        $this->makeDir($debug_dir);
         $this->path = $debug_dir."/".$type."-events-log-".$id.".log";
-        $this->debug_file = fopen($this->path,"w");
+
+        // Attempt to make the debug directory and open the log file
+        if ($this->makeDir($debug_dir) === true) {
+            $this->debug_file = $this->openFile($this->path);
+            if ($this->debug_file !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }
