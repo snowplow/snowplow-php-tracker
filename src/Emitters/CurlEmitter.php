@@ -65,13 +65,13 @@ class CurlEmitter extends Emitter {
     /**
      * Push event buffers into curls and store them
      * - Wait until we have an allotted amount of curls before executing
-     * - Or force the execution of the curl flush
+     * - Or force the execution of the curl emitter
      *
      * @param $buffer
-     * @param bool $force
+     * @param bool $flush
      * @return bool
      */
-    public function send($buffer, $force = false) {
+    public function send($buffer, $flush = false) {
         $type = $this->type;
         $debug = $this->debug;
 
@@ -99,7 +99,7 @@ class CurlEmitter extends Emitter {
         if (count($this->curl_buffer) >= $this->curl_limit) {
             return $this->rollingCurl($this->curl_buffer, $debug);
         }
-        else if ($force) {
+        else if ($flush === true) {
             if (count($this->curl_buffer) > 0) {
                 return $this->rollingCurl($this->curl_buffer ,$debug);
             }
