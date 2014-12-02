@@ -104,12 +104,10 @@ class Tracker extends Constants {
     /**
      * Will force send all events in the emitter(s) buffers
      * This happens irrespective of whether or not buffer limit has been reached
-     *
-     * @param bool $force - Will force flush the emitter regardless of events in the buffer
      */
-    public function flushEmitters($force = false) {
+    public function flushEmitters() {
         foreach ($this->emitters as $emitter) {
-            $emitter->forceFlush($force);
+            $emitter->forceFlush();
         }
     }
 
