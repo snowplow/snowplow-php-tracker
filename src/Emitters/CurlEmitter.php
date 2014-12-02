@@ -67,11 +67,12 @@ class CurlEmitter extends Emitter {
      * - Wait until we have an allotted amount of curls before executing
      * - Or force the execution of the curl emitter
      *
-     * @param $buffer
-     * @param bool $flush
-     * @return bool
+     * @param $buffer - An array of events we are going to convert into curl resources
+     * @param bool $curl_send - Whether or not we are going to send the buffered curl 
+     *                          objects before we reach the limit
+     * @return bool|string - Either true or an error string
      */
-    public function send($buffer, $flush = false) {
+    public function send($buffer, $curl_send = false) {
         $type = $this->type;
         $debug = $this->debug;
 
@@ -99,7 +100,7 @@ class CurlEmitter extends Emitter {
         if (count($this->curl_buffer) >= $this->curl_limit) {
             return $this->rollingCurl($this->curl_buffer, $debug);
         }
-        else if ($flush === true) {
+        else if ($curl_send === true) {
             if (count($this->curl_buffer) > 0) {
                 return $this->rollingCurl($this->curl_buffer ,$debug);
             }

@@ -57,12 +57,13 @@ class Emitter extends Constants {
     /**
      * Sends the buffer to the configured emitter for sending
      *
-     * @param array $buffer
-     * @param bool $flush
+     * @param array $buffer - The array of events that are ready for sending
+     * @param bool $curl_send - Boolean logic needed to ascertain whether or not
+     *                          we are going to start the curl emitter
      */
-    private function flush($buffer, $flush = false) {
+    private function flush($buffer, $curl_send = false) {
         if (count($buffer) > 0) {
-            $res = $this->send($buffer, $flush);
+            $res = $this->send($buffer, $curl_send);
             if (is_bool($res) && $res) {
                 if ($this->debug_mode) {
                     fwrite($this->debug_file,"Emitter sent payload successfully\n");
@@ -96,8 +97,6 @@ class Emitter extends Constants {
 
     /**
      * Sends all events in the buffer to the collector
-     *
-     * @param bool $force
      */
     public function forceFlush() {
         $this->flush($this->buffer, true);
