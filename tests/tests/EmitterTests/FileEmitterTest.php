@@ -48,11 +48,11 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
     public function testFilePostForceFlush() {
         $tracker = $this->returnTracker("POST", false);
         $tracker->returnSubject()->setNetworkUserId("network-id");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
     }
 
     public function testFileGetForceFlush() {
@@ -61,7 +61,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 10; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         // Will not do anything but we need to ensure
         // that if we have a file emitter it will not 
@@ -75,7 +75,7 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 1000; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
     }
 
     public function testBadType() {

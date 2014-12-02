@@ -58,11 +58,11 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testCurlPostBadUri() {
         $tracker = $this->returnTracker("POST", true, "collector.acme.au");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
@@ -71,11 +71,11 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testCurlGetBadUri() {
         $tracker = $this->returnTracker("GET", true, "collector.acme.au");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 404);
@@ -87,7 +87,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
@@ -99,7 +99,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);

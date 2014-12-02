@@ -84,7 +84,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testPvGet() {
         $tracker = $this->getTracker("GET");
         $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "pv-get");
         $tracker->turnOffDebug(true);
     }
@@ -92,7 +92,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testPvPost() {
         $tracker = $this->getTracker("POST");
         $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "pv-post");
         $tracker->turnOffDebug(true);
     }
@@ -100,7 +100,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testSvGet() {
         $tracker = $this->getTracker("GET");
         $tracker->trackScreenView("HUD", "Level: 23", $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "sv-get");
         $tracker->turnOffDebug(true);
     }
@@ -108,7 +108,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testSvPost() {
         $tracker = $this->getTracker("POST");
         $tracker->trackScreenView("HUD", "Level: 23", $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "sv-post");
         $tracker->turnOffDebug(true);
     }
@@ -116,7 +116,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testStructGet() {
         $tracker = $this->getTracker("GET");
         $tracker->trackStructEvent("shop", "add-to-basket", NULL, "pcs", 2, $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "struct-get");
         $tracker->turnOffDebug(true);
     }
@@ -124,7 +124,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testStructPost() {
         $tracker = $this->getTracker("POST");
         $tracker->trackStructEvent("shop", "add-to-basket", NULL, "pcs", 2, $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "struct-post");
         $tracker->turnOffDebug(true);
     }
@@ -132,7 +132,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testUnstructGet() {
         $tracker = $this->getTracker("GET");
         $tracker->trackUnstructEvent($this->getUnstructEvent(), $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "unstruct-get");
         $tracker->turnOffDebug(true);
     }
@@ -140,7 +140,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testUnstructPost() {
         $tracker = $this->getTracker("POST");
         $tracker->trackUnstructEvent($this->getUnstructEvent(), $this->getContext());
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "unstruct-post");
         $tracker->turnOffDebug(true);
     }
@@ -155,7 +155,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             ),
             $this->getContext()
         );
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "ecommerce-get");
         $tracker->turnOffDebug(true);
     }
@@ -170,7 +170,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
             ),
             $this->getContext()
         );
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $this->requestResultAssert($tracker->returnEmitters(), "ecommerce-post");
         $tracker->turnOffDebug(true);
     }
@@ -178,7 +178,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
     public function testDebugSwitch() {
         $tracker = $this->getTracker("GET");
         $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         $tracker->turnOffDebug(true);
         $emitters = $tracker->returnEmitters();
         foreach ($emitters as $emitter) {

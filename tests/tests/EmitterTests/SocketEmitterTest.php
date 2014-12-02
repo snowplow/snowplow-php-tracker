@@ -56,11 +56,11 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testSocketDebugGet() {
         $tracker = $this->returnTracker("GET", true, $this->uri);
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
@@ -69,11 +69,11 @@ class SocketEmitterTest extends PHPUnit_Framework_TestCase {
 
     public function testSocketDebugPost() {
         $tracker = $this->returnTracker("POST", true, $this->uri);
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
-        $tracker->flushEmitters(true);
+        $tracker->flushEmitters();
 
         //Asserts
         $this->requestResultAssert($tracker->returnEmitters(), 200);
