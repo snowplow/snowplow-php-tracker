@@ -31,7 +31,7 @@ class FileEmitter extends Emitter {
     private $url;
     private $log_dir;
     private $log_file;
-    private $write_perms;
+    private $fatal_error_occured = false;
 
     // Worker Parameters
     
@@ -50,19 +50,34 @@ class FileEmitter extends Emitter {
      * @param bool|null $debug
      */
     public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false) {
+
+        // Set error handler to catch warnings
+        $this->warning_handler();
+
         $this->type     = $this->getRequestType($type);
         $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->log_dir  = dirname(dirname(__DIR__))."/".self::WORKER_FOLDER;
+
+        // Initilize the event log file
         $this->log_file = $this->initLogFile();
+        if (!is_resource($this->log_file)) {
+            $this->write_perms = false;
+            print_r("Unable to construct event log files: ".$this->log_file."\n");
+        }
 
         // Creates worker directories and starts the background workers
-        if ($this->initWorkers($workers, $timeout) === true) {
+        $res = $this->initWorkers($workers, $timeout);
+        if ($res === true) {
             $this->write_perms = true;
         }
         else {
             $this->write_perms = false;
-            print_r("Unable to create workers: likely cause; invalid write permissions.");
+            print_r("Unable to construct file emitter without errors: ".$res."\n");
         }
+
+        // Restore error handler back to default
+        restore_error_handler();
+
         $buffer = $buffer_size == NULL ? self::WORKER_BUFFER : $buffer_size;
         $this->setup("file", $debug, $buffer);
     }
@@ -74,41 +89,53 @@ class FileEmitter extends Emitter {
      * @return bool
      */
     public function send($buffer) {
-        if (count($buffer) > 0 && $this->write_perms) {
+        if (count($buffer) > 0 && !$this->fatal_error_occured) {
+
+            // Set error handler to catch warnings
+            $this->warning_handler();
 
             // Add jsons to the log file.
             foreach ($buffer as $event) {
-                if ($this->writeToFile($this->log_file, json_encode($event)."\n") !== true) {
-                    $this->write_perms = false;
-                    return "Error: Unable to write events to log file.";
+                $res = $this->writeToFile($this->log_file, json_encode($event)."\n");
+                if ($res !== true) {
+                    $this->fatal_error_occured = true;
+                    restore_error_handler();
+                    return "Error: Unable to write events to log file\n".$res."\n\n";
                 }
             }
 
             // Close the log file so it can be copied
-            if ($this->closeFile($this->log_file) !== true) {
-                $this->write_perms = false;
-                return "Error: Unable to close events log file.";
+            $res = $this->closeFile($this->log_file);
+            if ($res !== true) {
+                $this->fatal_error_occured = true;
+                restore_error_handler();
+                return "Error: Unable to close events log file\n".$res."\n\n";
             }
 
             // Add the file to a worker folder.
             $pos = $this->getWorkerPos();
-            if ($this->copyFile($this->log_dir."events.log", $this->worker_paths[$pos]."events-".rand().".log") !== true) {
-                $this->write_perms = false;
-                return "Error: Unable to copy events log file to new directory.";
+            $res = $this->copyFile($this->log_dir."events.log", $this->worker_paths[$pos]."events-".rand().".log");
+            if ($res !== true) {
+                $this->fatal_error_occured = true;
+                restore_error_handler();
+                return "Error: Unable to copy events log file to new directory\n".$res."\n\n";
             }
 
             // Reset the log and continue...
-            if ($this->reset() !== true) {
-                $this->write_perms = false;
-                return "Error: Unable to reset events log file after copy.";
+            $this->log_file = $this->openFile($this->log_dir."/events.log");
+            if (!is_resource($this->log_file)) {
+                $this->fatal_error_occured = true;
+                restore_error_handler();
+                return "Error: Unable to reset events log file after copy\n".$res."\n\n";
             }
+            restore_error_handler();
             return true;
         }
-        else if (count($buffer) <= 0 && $this->write_perms) {
+        else if (count($buffer) <= 0 && !$this->fatal_error_occured) {
             return "Error: Nothing in the buffer to write to an events log file.";
         }
         else {
-            return "Error: Unable to create workers or log files: likely due to invalid write permissions.";
+            return "Error: Unable to create workers or manage log files without errors - likely due to invalid write permissions.";
         }
     }
 
@@ -118,13 +145,11 @@ class FileEmitter extends Emitter {
      * @return resource
      */
     private function initLogFile() {
-        if ($this->makeDir($this->log_dir) === true) {
-            $log_file = $this->openFile($this->log_dir."/events.log");
-            if ($log_file !== false) {
-                return $log_file;
-            }
+        $res = $this->makeDir($this->log_dir);
+        if ($res === true) {
+            $res = $this->openFile($this->log_dir."/events.log");
         }
-        return false;
+        return $res;
     }
 
     /**
@@ -137,7 +162,8 @@ class FileEmitter extends Emitter {
         $workers = $workers == NULL ? self::WORKER_COUNT : $workers;
 
         // Make the log failure directory
-        if ($this->makeDir($this->log_dir."failed-logs/") === true) {
+        $res = $this->makeDir($this->log_dir."failed-logs/");
+        if ($res === true) {
 
             // Create the workers
             for ($i = 0; $i < $workers; $i++) {
@@ -147,16 +173,17 @@ class FileEmitter extends Emitter {
                 array_push($this->worker_paths, $worker_dir);
 
                 // Make the worker directory and start the worker
-                if ($this->makeDir($worker_dir) === true) {
+                $res = $this->makeDir($worker_dir);
+                if ($res === true) {
                     $this->makeWorker($i, $timeout);
                 }
                 else {
-                    return false;
+                    return $res;
                 }
             }
             return true;
         }
-        return false;
+        return $res;
     }
 
     /**
@@ -204,19 +231,6 @@ class FileEmitter extends Emitter {
     }
 
     /**
-     * Resets the events.log file to empty
-     *
-     * @return bool - Whether or not the reset was a success
-     */
-    private function reset() {
-        $this->log_file = $this->openFile($this->log_dir."/events.log");
-        if ($this->log_file !== false) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * Creates a command which does not wait for any response.
      * - Essentially sends any response into the abyss
      * - Makes the background process non blocking
@@ -235,11 +249,10 @@ class FileEmitter extends Emitter {
 
     /**
      * Disables debug mode
-     * - Function is here to prevent errors when passing a 
-     *   global debug shutdown
+     * - Only affects the base emitter class
      */
-    public function turnOffDebug() {
-        print_r("File Emitter does not have a debug mode yet!.\n");
+    public function turnOffDebug($deleteLocal) {
+        $this->debugSwitch($deleteLocal);
     }
 
     // File Return Functions
