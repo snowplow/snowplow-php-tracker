@@ -39,6 +39,8 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
 
     // Helper Functions & Values
 
+    private $payload_schema = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2";
+
     // Tracker, Emitter & Context Builders
 
     private function getTracker($type) {
@@ -243,7 +245,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("schema", $data);
         $this->assertArrayHasKey("data", $data);
-        $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
+        $this->assertEquals($this->payload_schema, $data["schema"]);
 
         $data = $data["data"];
 
@@ -281,7 +283,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("schema", $data);
         $this->assertArrayHasKey("data", $data);
-        $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
+        $this->assertEquals($this->payload_schema, $data["schema"]);
 
         $data = $data["data"];
 
@@ -321,7 +323,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("schema", $data);
         $this->assertArrayHasKey("data", $data);
-        $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
+        $this->assertEquals($this->payload_schema, $data["schema"]);
 
         $data = $data["data"];
 
@@ -360,7 +362,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("schema", $data);
         $this->assertArrayHasKey("data", $data);
-        $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
+        $this->assertEquals($this->payload_schema, $data["schema"]);
 
         $data = $data["data"];
 
@@ -426,7 +428,7 @@ class IntegrationTest extends PHPUnit_Framework_TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("schema", $data);
         $this->assertArrayHasKey("data", $data);
-        $this->assertEquals("iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1", $data["schema"]);
+        $this->assertEquals($this->payload_schema, $data["schema"]);
 
         $data = $data["data"];
 
