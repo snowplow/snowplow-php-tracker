@@ -22,6 +22,7 @@
 */
 
 namespace Snowplow\Tracker;
+use ErrorException;
 
 class Emitter extends Constants {
 
@@ -49,6 +50,10 @@ class Emitter extends Constants {
      */
     public function setup($type, $debug, $buffer_size) {
         $this->buffer_size = $buffer_size;
+
+        // Set error handler to catch warnings
+        $this->warning_handler();
+
         if ($debug === true) {
             $this->debug_mode = true;
 
@@ -56,13 +61,16 @@ class Emitter extends Constants {
             if (self::DEBUG_LOG_FILES) {
                 if ($this->initDebug($type) !== true) {
                     $this->write_perms = false;
-                    print_r("Unable to create debug log files: likely cause; invalid write permissions.");
+                    print_r("Unable to create debug log files: invalid write permissions.");
                 }
             }
         }
         else {
             $this->debug_mode = false;
         }
+
+        // Restore error handler back to default
+        restore_error_handler();
     }
 
     /**
@@ -75,9 +83,13 @@ class Emitter extends Constants {
     private function flush($buffer, $curl_send = false) {
         if (count($buffer) > 0) {
             $res = $this->send($buffer, $curl_send);
+
+            // Set error handler to catch warnings
+            $this->warning_handler();
+
             if (is_bool($res) && $res) {
                 $success_string = "Payload sent successfully\nPayload: ".json_encode($buffer)."\n\n";
-                if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
+                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
                     if ($this->writeToFile($this->debug_file, $success_string) !== true) {
                         print_r($success_string);
                         $this->write_perms = false;
@@ -89,7 +101,7 @@ class Emitter extends Constants {
             }
             else {
                 $error_string = $res."\nPayload: ".json_encode($buffer)."\n\n";
-                if (self::DEBUG_LOG_FILES && $this->debug_mode && $this->write_perms) {
+                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
                     if ($this->writeToFile($this->debug_file, $error_string) !== true) {
                         print_r($error_string);
                         $this->write_perms = false;
@@ -100,6 +112,9 @@ class Emitter extends Constants {
                 }
             }
             $this->buffer = array();
+
+            // Restore error handler back to default
+            restore_error_handler();
         }
     }
 
@@ -140,13 +155,12 @@ class Emitter extends Constants {
             $this->debug_mode = false;
 
             // If log files, write permissions and closure of file resource are all true
-            if (self::DEBUG_LOG_FILES && 
-                $this->write_perms &&
-                $this->closeFile($this->debug_file)) {
+            if (self::DEBUG_LOG_FILES && $this->write_perms) {
+                $this->closeFile($this->debug_file);
 
                 // If set to true delete the log file as well
                 if ($deleteLocal) {
-                    unlink($this->path);
+                    $this->deleteFile($this->path);
                 }
             }
         }
@@ -190,7 +204,7 @@ class Emitter extends Constants {
      * not exists already.
      *
      * @param string $dir - The directory we want to make
-     * @return bool - Boolean describing if the creation was a success
+     * @return bool|string - Boolean describing if the creation was a success
      */
     public function makeDir($dir) {
         try {
@@ -198,37 +212,38 @@ class Emitter extends Constants {
                 mkdir($dir);
             }
             return true;
-        } catch (Exception $e) {
-            return false;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
         }
     }
 
     /**
      * Attempts to return an opened file resource that can be written to
+     * - If the file does not exist will attempt to make the file
      *
      * @param string $file_path - The path to the file we want to write to
-     * @return bool|resource - Either a file resource or a false boolean
+     * @return string|resource - Either a file resource or a false boolean
      */
     public function openFile($file_path) {
         try {
             return fopen($file_path, "w");
-        } catch (Exception $e) {
-            return false;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
         }
     }
 
     /**
      * Attempts to close an open file resource
      *
-     * @param string $file_path - The path to the file we want to close
-     * @return bool|resource - Whether or not the close was a success
+     * @param resource $file_path - The path to the file we want to close
+     * @return bool|string - Whether or not the close was a success
      */
     public function closeFile($file_path) {
         try {
             fclose($file_path);
             return true;
-        } catch (Exception $e) {
-            return false;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
         }
     } 
 
@@ -237,30 +252,45 @@ class Emitter extends Constants {
      *
      * @param string $path_from - The path to the file we want to copy
      * @param string $path_to - The path which we want to copt the file to
-     * @return bool|resource - Whether or not the copy was a success
+     * @return bool|string - Whether or not the copy was a success
      */
     public function copyFile($path_from, $path_to) {
         try {
             copy($path_from, $path_to);
             return true;
-        } catch (Exception $e) {
-            return false;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Attempts to delete a file
+     *
+     * @param string $file_path - The path of the file we want to delete
+     * @return 
+     */
+    public function deleteFile($file_path) {
+        try {
+            unlink($file_path);
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
         }
     }
 
     /**
      * Attempts to write a string to a file
      *
-     * @param string $file_path - The path of the file we want to write to
+     * @param resource $file_path - The path of the file we want to write to
      * @param string $content - The content we want to write into the file
-     * @return bool - If the write was successful or not
+     * @return bool|string - If the write was successful or not
      */
     public function writeToFile($file_path, $content) {
         try {
             fwrite($file_path, $content);
             return true;
-        } catch (Exception $e) {
-            return false;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
         }
     }
 
