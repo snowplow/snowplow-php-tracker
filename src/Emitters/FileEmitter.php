@@ -61,18 +61,15 @@ class FileEmitter extends Emitter {
         // Initilize the event log file
         $this->log_file = $this->initLogFile();
         if (!is_resource($this->log_file)) {
-            $this->write_perms = false;
-            print_r("Unable to construct event log files: ".$this->log_file."\n");
+            $this->fatal_error_occured = true;
+            print_r("Error: Unable to construct event log files: ".$this->log_file."\n");
         }
 
-        // Creates worker directories and starts the background workers
+        // Creates worker directories and start the background workers
         $res = $this->initWorkers($workers, $timeout);
-        if ($res === true) {
-            $this->write_perms = true;
-        }
-        else {
-            $this->write_perms = false;
-            print_r("Unable to construct file emitter without errors: ".$res."\n");
+        if ($res !== true) {
+            $this->fatal_error_occured = true;
+            print_r("Error: Unable to construct file emitter without errors: ".$res."\n");
         }
 
         // Restore error handler back to default
