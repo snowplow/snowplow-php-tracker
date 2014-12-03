@@ -21,6 +21,7 @@
 */
 
 namespace Snowplow\Tracker;
+use ErrorException;
 
 /**
  * Contains all of the constants needed for the PHP Tracker.
@@ -113,4 +114,13 @@ class Constants {
     const WORKER_BUFFER_GET  = 1;
     const WORKER_WINDOW_POST = 10;
     const WORKER_WINDOW_GET  = 30;
+
+    /**
+     * Custom handler to turn all PHP Warnings into ErrorExceptions
+     */
+    public function warning_handler() {
+        set_error_handler(function($errno, $errstr, $errfile, $errline, array $errcontext) {
+            throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+        }, E_WARNING);
+    }
 }
