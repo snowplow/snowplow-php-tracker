@@ -1,6 +1,7 @@
 Version 0.2.0 (2014-12-01)
 --------------------------
 Updated contexts schema to 1-0-1 (#27)
+Updated payload_data schema to 1-0-2 (#32)
 Added setDomainUserId to Subject class (#23)
 Added setNetworkUserId to Subject class (#21)
 Added setUseragent to Subject class (#17)
@@ -12,7 +13,6 @@ Added File-Based Emitter as Emitter Option for Tracker (#9)
 Added Asynchronous Curl Emitter as Emitter Option for Tracker (#8)
 Added Ability to test the full payload and response for every request (#15)
 Updated PHPUnit Dependancy to 4.2.* (#19)
-Updated payload_data version to 1-0-1 (#18)
 
 Version 0.1.0 (2014-09-30)
 --------------------------
