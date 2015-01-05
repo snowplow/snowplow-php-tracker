@@ -1,5 +1,4 @@
 <?php
-
 /*
     PayloadTest.php
 
@@ -20,9 +19,15 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 use Snowplow\Tracker\Payload;
 
+/**
+ * Tests the functions used to construct the event
+ * payloads
+ */
 class PayloadTest extends PHPUnit_Framework_TestCase {
+
     public function testPayloadAdd() {
         $event_payload = new Payload();
         $event_payload->add("sku", "WM5");

@@ -20,9 +20,14 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
+
 namespace Snowplow\Tracker;
 
-class Payload {
+class Payload extends Constants {
+    
+    // Payload Parameters
+    
+    private $nv_pairs;
 
     /**
      * Constructs a Payload object, contains an array in which event parameters are stored
@@ -70,7 +75,7 @@ class Payload {
      * @param string $name_not_encoded - Name of the field when encode_base64 is set
      */
     public function addJson($json, $base_64, $name_encoded, $name_not_encoded) {
-        if ($json != null) {
+        if ($json != NULL) {
             if ($base_64) {
                 $this->add($name_encoded, base64_encode(json_encode($json)));
             }

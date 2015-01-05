@@ -20,152 +20,355 @@
     Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
-namespace Snowplow\Tracker;
-use Requests;
 
-class Emitter {
-    const DEFAULT_REQ_TYPE = "POST";
-    const DEFAULT_PROTOCOL = "http";
-    const DEFAULT_BUFFER_SIZE = 10;
-    const BASE_SCHEMA_PATH = "iglu:com.snowplowanalytics.snowplow";
-    const SCHEMA_TAG = "jsonschema";
+namespace Snowplow\Tracker;
+use ErrorException;
+
+class Emitter extends Constants {
+
+    // Emitter Parameters
+
+    private $buffer_size;
+    private $buffer = array();
+
+    // Debug Parameters
+
+    private $debug_mode;
+    private $write_perms = true;
+    private $debug_file;
+    private $path;
 
     /**
-     * Constructs an emitter object which will be used to send event data to a collector
+     * Setup emitter parameters
+     * - Stores the emitter sub-class object
+     * - Sets the emitter buffer size
+     * - Sets debug mode
      *
-     * @param string $collector_uri - URI of the collector
-     * @param string|null $req_type - Request Type (POST or GET)
-     * @param string|null $protocol - Protocol to be used (HTTP or HTTPS)
-     * @param int|null $buffer_size - Buffer Size, amount of events to be stored before sending
+     * @param string $type
+     * @param bool $debug
+     * @param int $buffer_size
      */
-    public function __construct($collector_uri, $req_type = NULL, $protocol = NULL, $buffer_size = NULL) {
-        $this->post_request_schema = self::BASE_SCHEMA_PATH."/payload_data/".self::SCHEMA_TAG."/1-0-0";
-        $this->req_type = ($req_type != null) ? $req_type : self::DEFAULT_REQ_TYPE;
-        $this->protocol = ($protocol != null) ? $protocol : self::DEFAULT_PROTOCOL;
-        $this->collector_url = $this->returnCollectorUrl($collector_uri);
-        if ($buffer_size == NULL) {
-            if ($this->req_type == "POST") {
-                $this->buffer_size = self::DEFAULT_BUFFER_SIZE;
-            }
-            else {
-                $this->buffer_size = 1;
+    public function setup($type, $debug, $buffer_size) {
+        $this->buffer_size = $buffer_size;
+
+        // Set error handler to catch warnings
+        $this->warning_handler();
+
+        if ($debug === true) {
+            $this->debug_mode = true;
+
+            // If physical logging is set to true
+            if (self::DEBUG_LOG_FILES) {
+                if ($this->initDebug($type) !== true) {
+                    $this->write_perms = false;
+                    print_r("Unable to create debug log files: invalid write permissions.");
+                }
             }
         }
         else {
-            $this->buffer_size = (int) $buffer_size;
+            $this->debug_mode = false;
         }
-        $this->buffer = array();
-        $this->requests_results = array();
+
+        // Restore error handler back to default
+        restore_error_handler();
     }
 
     /**
-     * Pushes the event payload into the emitter buffer.
-     * When buffer is full it flushes the buffer.
+     * Sends the buffer to the configured emitter for sending
      *
-     * @param array $final_payload - Takes the Trackers Payload as a parameter
+     * @param array $buffer - The array of events that are ready for sending
+     * @param bool $curl_send - Boolean logic needed to ascertain whether or not
+     *                          we are going to start the curl emitter
      */
-    public function sendEvent($final_payload) {
-        array_push($this->buffer, $final_payload);
-        if (count($this->buffer) >= $this->buffer_size) {
-            $this->flush();
-        }
-    }
+    private function flush($buffer, $curl_send = false) {
+        if (count($buffer) > 0) {
+            $res = $this->send($buffer, $curl_send);
 
-    /**
-     * Flushes the event buffer of the emitter
-     * Checks which send type the emitter is using and forwards data accordingly
-     * Resets the buffer to nothing after flushing
-     */
-    public function flush() {
-        if (count($this->buffer) != 0 ) {
-            if ($this->req_type == "POST") {
-                $data = $this->returnPostRequest();
-                $this->postRequest($data);
+            // Set error handler to catch warnings
+            $this->warning_handler();
+
+            if (is_bool($res) && $res) {
+                $success_string = "Payload sent successfully\nPayload: ".json_encode($buffer)."\n\n";
+                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
+                    if ($this->writeToFile($this->debug_file, $success_string) !== true) {
+                        print_r($success_string);
+                        $this->write_perms = false;
+                    }
+                }
+                else if ($this->debug_mode) {
+                    print_r($success_string);
+                }
             }
-            else if ($this->req_type == "GET") {
-                foreach ($this->buffer as $data) {
-                    $this->getRequest($data);
+            else {
+                $error_string = $res."\nPayload: ".json_encode($buffer)."\n\n";
+                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
+                    if ($this->writeToFile($this->debug_file, $error_string) !== true) {
+                        print_r($error_string);
+                        $this->write_perms = false;
+                    }
+                }
+                else if ($this->debug_mode) {
+                    print_r($error_string);
                 }
             }
             $this->buffer = array();
-        }
-    }
 
-    // Send Functions
-    /**
-     * Using a GET Request sends the data to a collector
-     *
-     * @param array $data - The array which is going to be sent in the GET Request
-     */
-    private function getRequest($data) {
-        $r = Requests::get($this->collector_url.http_build_query($data));
-        $this->storeRequestResults($r);
-    }
-
-    /**
-     * Using a POST Request sends the data to a collector
-     *
-     * @param array $data - Is the array which is going to be sent in the POST Request
-     */
-    private function postRequest($data) {
-        $header = array('Content-Type' => 'application/json; charset=utf-8');
-        $r = Requests::post($this->collector_url, $header, json_encode($data));
-        $this->storeRequestResults($r);
-    }
-
-    // Make Functions
-    /**
-     * Returns the collector URL based on: request type, protocol and host given
-     * IF a bad type is given in emitter creation returns NULL
-     *
-     * @param string $host - The Collector URI to be used for tracking
-     * @return string|null collector_url - Returns the Collector URL
-     */
-    private function returnCollectorUrl($host) {
-        switch ($this->req_type) {
-            case "POST": return $this->protocol."://".$host."/com.snowplowanalytics.snowplow/tp2";
-                break;
-            case "GET": return $this->protocol."://".$host."/i?";
-                break;
-            default: return NULL;
+            // Restore error handler back to default
+            restore_error_handler();
         }
     }
 
     /**
-     * Returns an array which has been formatted to be ready for a POST Request
+     * Pushes the event payload into the emitter buffer
+     * When buffer is full it flushes the buffer
+     * - Checks for any changes in the nuid parameter.
+     * - If there has been a change it will:
+     *   - flush the current buffer
+     *   - set the new nuid
      *
-     * @return array - POST Request formatted array
+     * @param array $final_payload - Takes the Trackers Payload as a parameter
      */
-    private function returnPostRequest() {
-        $data_post_request = array("schema" => $this->post_request_schema, "data" => array());
-        foreach($this->buffer as $event) {
-            array_push($data_post_request["data"], $event);
+    public function addEvent($final_payload) {
+        array_push($this->buffer, $final_payload);
+        if (count($this->buffer) >= $this->buffer_size) {
+            $this->flush($this->buffer);
         }
-        return $data_post_request;
+    }
+
+    /**
+     * Sends all events in the buffer to the collector
+     */
+    public function forceFlush() {
+        $this->flush($this->buffer, true);
+    }
+
+    /**
+     * Turns off debug_mode for the emitter
+     * - Closes and deletes the log resource
+     *
+     * @param bool $deleteLocal - Delete all local information
+     */
+    public function debugSwitch($deleteLocal) {
+        if ($this->debug_mode === true) {
+
+            // Turn off debug_mode
+            $this->debug_mode = false;
+
+            // If log files, write permissions and closure of file resource are all true
+            if (self::DEBUG_LOG_FILES && $this->write_perms) {
+                $this->closeFile($this->debug_file);
+
+                // If set to true delete the log file as well
+                if ($deleteLocal) {
+                    $this->deleteFile($this->path);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the Collector URL
+     *
+     * @param string $type - The type of request we will be making to the collector
+     * @param string $uri - Collector URI
+     * @param string $protocol - What protocol we are using for the collector
+     * @return string
+     */
+    public function getCollectorUrl($type, $uri, $protocol) {
+        $protocol = $protocol == NULL ? self::DEFAULT_PROTOCOL : $protocol;
+        if ($type == "POST") {
+            return $protocol."://".$uri.self::POST_PATH;
+        }
+        else {
+            return $protocol."://".$uri.self::GET_PATH;
+        }
+    }
+
+    /**
+     * Returns the request type that the emitter will use
+     * - Makes sure that we cannot return an invalid type
+     *   as the type determines many facets of the emitters
+     * - If there is an invalid type OR NULL it will always
+     *   be the default type == POST
+     */
+    public function getRequestType($type) {
+        switch ($type) {
+            case "POST" : return $type;
+            case "GET"  : return $type;
+            default     : return self::DEFAULT_REQ_TYPE;
+        }
+    }
+
+    /**
+     * Creates a new directory if the supplied directory path does
+     * not exists already.
+     *
+     * @param string $dir - The directory we want to make
+     * @return bool|string - Boolean describing if the creation was a success
+     */
+    public function makeDir($dir) {
+        try {
+            if (!is_dir($dir)) {
+                mkdir($dir);
+            }
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Attempts to return an opened file resource that can be written to
+     * - If the file does not exist will attempt to make the file
+     *
+     * @param string $file_path - The path to the file we want to write to
+     * @return string|resource - Either a file resource or a false boolean
+     */
+    public function openFile($file_path) {
+        try {
+            return fopen($file_path, "w");
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Attempts to close an open file resource
+     *
+     * @param resource $file_path - The path to the file we want to close
+     * @return bool|string - Whether or not the close was a success
+     */
+    public function closeFile($file_path) {
+        try {
+            fclose($file_path);
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    } 
+
+    /**
+     * Attempts to copy a file to a new directory
+     *
+     * @param string $path_from - The path to the file we want to copy
+     * @param string $path_to - The path which we want to copt the file to
+     * @return bool|string - Whether or not the copy was a success
+     */
+    public function copyFile($path_from, $path_to) {
+        try {
+            copy($path_from, $path_to);
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Attempts to delete a file
+     *
+     * @param string $file_path - The path of the file we want to delete
+     * @return 
+     */
+    public function deleteFile($file_path) {
+        try {
+            unlink($file_path);
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    /**
+     * Attempts to write a string to a file
+     *
+     * @param resource $file_path - The path of the file we want to write to
+     * @param string $content - The content we want to write into the file
+     * @return bool|string - If the write was successful or not
+     */
+    public function writeToFile($file_path, $content) {
+        try {
+            fwrite($file_path, $content);
+            return true;
+        } catch (ErrorException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    // Return Functions
+
+    /**
+     * Returns the buffer_size
+     *
+     * @return int
+     */
+    public function returnBufferSize() {
+        return $this->buffer_size;
+    }
+
+    /**
+     * Returns the events buffer
+     *
+     * @return array
+     */
+    public function returnBuffer() {
+        return $this->buffer;
+    }
+
+    /**
+     * Returns a boolean of if debug mode is on or not
+     *
+     * @return bool
+     */
+    public function returnDebugMode() {
+        return $this->debug_mode;
+    }
+
+    /**
+     * Returns the emitter debug file
+     *
+     * @return resource|null
+     */
+    public function returnDebugFile() {
+        return $this->debug_file;
     }
 
     // Debug Functions
+
     /**
-     * Returns the array of stored results from a request
+     * Initialize Debug Logging Paths and Files
      *
-     * @return array - Dynamic array of stored results
+     * @param string $emitter_type - Type of emitter we are logging for
      */
-    public function getRequestResults() {
-        return $this->requests_results;
+    private function initDebug($emitter_type) {
+        $this->debug_mode = true;
+        $id = uniqid("", true);
+
+        // If the debug files were created successfully...
+        if ($this->initDebugLogFiles($id, $emitter_type) === true) {
+            $debug_header = "Event Log File\nEmitter: ".$emitter_type."\nID: ".$id."\n\n";
+            return $this->writeToFile($this->debug_file, $debug_header);
+        }
+        return false;
     }
 
     /**
-     * Stores all of the parameters of the Request Response into a Dynamic Array for use in unit testing.
+     * Creates the debug log files
      *
-     * @param \Requests_Response $r - Is the response from a GET or POST request
+     * @param string $id - Random id for the log file
+     * @param string $type - Type of emitter we are logging for
+     * @return bool - Whether or not debug file init was successful
      */
-    private function storeRequestResults(\Requests_Response $r) {
-        $array = array();
-        $array["url"] = $r->url;
-        $array["code"] = $r->status_code;
-        $array["headers"] = $r->headers;
-        $array["body"] = $r->body;
-        $array["raw"] = $r->raw;
-        array_push($this->requests_results, $array);
+    private function initDebugLogFiles($id, $type) {
+        $debug_dir = dirname(__DIR__)."/debug";
+        $this->path = $debug_dir."/".$type."-events-log-".$id.".log";
+
+        // Attempt to make the debug directory and open the log file
+        if ($this->makeDir($debug_dir) === true) {
+            $this->debug_file = $this->openFile($this->path);
+            if ($this->debug_file !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }

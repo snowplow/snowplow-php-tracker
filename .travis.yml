@@ -5,11 +5,21 @@ php:
   - "5.4"
   - "5.3"
 
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install nodejs
+  - sudo apt-get install npm
+
+install:
+  - npm install -g mountebank --production
+
 before_script:
+  - mb &
   - composer self-update
   - composer install
 
 script:
+  - "curl -X POST -d @tests/mountebank_mocks/imposter.json http://localhost:2525/imposters"
   - phpunit
 
 after_script:
