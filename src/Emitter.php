@@ -120,11 +120,7 @@ class Emitter extends Constants {
 
     /**
      * Pushes the event payload into the emitter buffer
-     * When buffer is full it flushes the buffer
-     * - Checks for any changes in the nuid parameter.
-     * - If there has been a change it will:
-     *   - flush the current buffer
-     *   - set the new nuid
+     * When buffer is full it flushes the buffer.
      *
      * @param array $final_payload - Takes the Trackers Payload as a parameter
      */
