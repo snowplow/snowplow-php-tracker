@@ -13,7 +13,8 @@
         "email": "support@snowplowanalytics.com"
     },
     "require": {
-        "rmccue/requests": ">=1.0"
+        "rmccue/requests": ">=1.0",
+        "rhumsaa/uuid": "2.8.*"
     },
     "require-dev": {
         "phpunit/phpunit": "4.3.*",
