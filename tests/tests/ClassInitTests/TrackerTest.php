@@ -57,7 +57,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         // Asserts
         $this->assertEquals($this->s1, $tracker->returnSubject());
         $this->assertEquals(false, $tracker->returnEncodeBase64());
-        $this->assertEquals(array("tv" => "php-0.2.0", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
+        $this->assertEquals(array("tv" => "php-0.2.1", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
         $tracker->turnOffDebug(true);
     }
 
