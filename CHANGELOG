@@ -1,3 +1,9 @@
+Version 0.2.1 (2015-02-09)
+--------------------------
+Fixed uniqid not generating valid UUID, thanks @mlively! (#39)
+Fixed infinite loop issue in Curl Emitter, thanks @mlively! (#43)
+Bumped PHPUnit version to 4.5.0 (#44)
+
 Version 0.2.0 (2015-01-05)
 --------------------------
 Added CHANGELOG (#22)

@@ -46,7 +46,7 @@ class Constants {
      * - SSL: the default for whether or not to use SSL Encryption
      * - Type: the default for what type of request the emitter will be making (POST or GET)
      */
-    const TRACKER_VERSION       = "php-0.2.0";
+    const TRACKER_VERSION       = "php-0.2.1";
     const DEFAULT_BASE_64       = true;
     const DEBUG_LOG_FILES       = true;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";

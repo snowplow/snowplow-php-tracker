@@ -57,7 +57,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         // Asserts
         $this->assertEquals($this->s1, $tracker->returnSubject());
         $this->assertEquals(false, $tracker->returnEncodeBase64());
-        $this->assertEquals(array("tv" => "php-0.2.0", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
+        $this->assertEquals(array("tv" => "php-0.2.1", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
         $tracker->turnOffDebug(true);
     }
 
@@ -106,5 +106,24 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         // Assert
         $this->assertEquals(2, count($tracker->returnEmitters()));
         $tracker->turnOffDebug(true);
+    }
+
+    public function testEventIdIsProperlyGenerated()
+    {
+        $emitter = $this->getMockBuilder('Snowplow\Tracker\Emitter')->getMock();
+
+        $test = $this;
+        $emitter->expects($this->once())
+            ->method('addEvent')
+            ->with($this->callback(function ($a) use($test) {
+                $test->assertArrayHasKey('eid', $a);
+                $test->assertRegExp('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $a['eid']);
+
+                return true;
+            }));
+
+        $tracker = new Tracker($this->e1, $this->s1, "namespace", "app_id", false);
+        $tracker->addEmitter($emitter);
+        $tracker->trackPageView("http:/example.com");
     }
 }

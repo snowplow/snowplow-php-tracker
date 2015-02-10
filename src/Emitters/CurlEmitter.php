@@ -143,8 +143,10 @@ class CurlEmitter extends Emitter {
 
         // Execute the rolling curl
         do {
-            $execrun = curl_multi_exec($master, $running);
-            while ($execrun == CURLM_CALL_MULTI_PERFORM);
+            do {
+                $execrun = curl_multi_exec($master, $running);
+            } while ($execrun == CURLM_CALL_MULTI_PERFORM);
+
             while ($done = curl_multi_info_read($master)) {
                 if ($debug) {
                     $info = curl_getinfo($done['handle']);
