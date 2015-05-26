@@ -148,6 +148,24 @@ class Subject extends Constants {
         $this->tracker_settings["duid"] = $domainUserId;
     }
 
+    /**
+     * Sets the referer
+     *
+     * @param string $refr
+     */
+    public function setRefr($refr) {
+        $this->tracker_settings["refr"] = $refr;
+    }
+
+    /**
+     * Sets the page URL
+     *
+     * @param string $pageUrl
+     */
+    public function setPageUrl($pageUrl) {
+        $this->tracker_settings["url"] = $pageUrl;
+    }
+
     // Subject Return Functions
     
     public function returnTrackerSettings() {
