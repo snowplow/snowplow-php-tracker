@@ -23,12 +23,15 @@
 
 namespace Snowplow\Tracker;
 
-use Rhumsaa\Uuid\Uuid;
+use Snowplow\Tracker\AdapterGeneratorUuidInterface;
+use Snowplow\Tracker\WebpatserLaravelUuid;
 
 class Tracker extends Constants {
 
-    // Tracker Parameters
-    
+    /**
+     * @var Snowplow\Tracker\AdapterGeneratorUuidInterface
+     */
+    private $adapterGeneratorUuid;
     private $subject;
     private $emitters;
     private $encode_base64;
@@ -66,9 +69,20 @@ class Tracker extends Constants {
             "tna" => $namespace,
             "aid" => $app_id
         );
+
+        //Default Generator Adapter
+        $this->setAdapterGeneratorUuid(new WebpatserLaravelUuid());
     }
 
-    // Setter Functions
+    /**
+     * Set AdapterGeneratorUuidInterface used for hash generation.
+     *
+     * @param Snowplow\Tracker\AdapterGeneratorUuidInterface $adapterGeneratorUuid
+     */
+    public function setAdapterGeneratorUuid(AdapterGeneratorUuidInterface $adapterGeneratorUuid)
+    {
+        $this->adapterGeneratorUuid = $adapterGeneratorUuid;
+    }
     
     /**
      * Updates the subject of the tracker with a new subject
@@ -141,21 +155,8 @@ class Tracker extends Constants {
         }
         $ep->addDict($this->std_nv_pairs);
         $ep->addDict($this->subject->getSubject());
-        $ep->add("eid", $this->generateUuid());
+        $ep->add("eid", $this->adapterGeneratorUuid->generateUuid());
         return $ep;
-    }
-
-    /**
-     * Generates and returns a unique id string for the event
-     *
-     * @return string - Unique String based on the time of creation
-     */
-    private function generateUuid() {
-        if (function_exists('uuid_create'))
-        {
-            return uuid_create(UUID_TYPE_TIME);
-        }
-        return Uuid::uuid1()->toString();
     }
 
     /**
