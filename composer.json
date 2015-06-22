@@ -1,6 +1,6 @@
 {
-    "name": "snowplow/snowplow-tracker",
-    "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
+    "name": "sparwelt/snowplow-tracker",
+    "description": "Fork of Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
     "type": "library",
     "license": "Apache-2.0",
     "keywords": [
@@ -28,7 +28,7 @@
     },
     "authors": [
         {
-            "name": "Joshua Beemster"
+            "name": "Pawel Graczyk"
         }
     ]
 }
