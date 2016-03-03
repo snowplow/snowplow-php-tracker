@@ -13,7 +13,7 @@
         "email": "support@snowplowanalytics.com"
     },
     "require": {
-        "rmccue/requests": ">=1.0",
+        "rmccue/requests": "^1.0",
         "ramsey/uuid": "^3.5"
     },
     "require-dev": {
