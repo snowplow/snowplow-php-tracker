@@ -47,8 +47,10 @@ class SocketEmitter extends Emitter {
      * @param float|int|null $timeout
      * @param int|null $buffer_size
      * @param bool|null $debug
+     * @param LoggerInterface|null $logger
      */
-    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL) {
+    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL, $logger = NULL) {
+        $this->setupLogger($logger);
         $this->type    = $this->getRequestType($type);
         $this->uri     = $uri;
         $this->ssl     = $ssl == NULL ? self::DEFAULT_SSL : (bool) $ssl;

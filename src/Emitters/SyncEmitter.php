@@ -40,8 +40,10 @@ class SyncEmitter extends Emitter {
      * @param string|null $type
      * @param int|null $buffer_size
      * @param bool $debug
+     * @param LoggerInterface|null $logger
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $logger = NULL) {
+        $this->setupLogger($logger);
         $this->type = $this->getRequestType($type);
         $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
 

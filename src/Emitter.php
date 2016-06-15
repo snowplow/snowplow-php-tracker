@@ -23,6 +23,8 @@
 
 namespace Snowplow\Tracker;
 use ErrorException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class Emitter extends Constants {
 
@@ -37,6 +39,10 @@ class Emitter extends Constants {
     private $write_perms = true;
     private $debug_file;
     private $path;
+
+    // Logger
+
+    private $logger;
 
     /**
      * Setup emitter parameters
@@ -61,7 +67,7 @@ class Emitter extends Constants {
             if (self::DEBUG_LOG_FILES) {
                 if ($this->initDebug($type) !== true) {
                     $this->write_perms = false;
-                    print_r("Unable to create debug log files: invalid write permissions.");
+                    $this->returnLogger()->error("Unable to create debug log files: invalid write permissions.");
                 }
             }
         }
@@ -71,6 +77,22 @@ class Emitter extends Constants {
 
         // Restore error handler back to default
         restore_error_handler();
+    }
+
+    /**
+     * Set logger if passed, or create a logger stub
+     * @param LoggerInterface|null
+     */
+    protected function setupLogger($logger) {
+        if (is_null($logger)) {
+            $this->logger = new NullLogger();
+        } else {
+            $this->logger = $logger;
+        }
+    }
+
+    protected function returnLogger() {
+        return $this->logger;
     }
 
     /**
@@ -91,24 +113,24 @@ class Emitter extends Constants {
                 $success_string = "Payload sent successfully\nPayload: ".json_encode($buffer)."\n\n";
                 if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
                     if ($this->writeToFile($this->debug_file, $success_string) !== true) {
-                        print_r($success_string);
+                        $this->returnLogger()->debug($success_string);
                         $this->write_perms = false;
                     }
                 }
                 else if ($this->debug_mode) {
-                    print_r($success_string);
+                    $this->returnLogger()->debug($success_string);
                 }
             }
             else {
                 $error_string = $res."\nPayload: ".json_encode($buffer)."\n\n";
                 if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
                     if ($this->writeToFile($this->debug_file, $error_string) !== true) {
-                        print_r($error_string);
+                        $this->returnLogger()->error($error_string);
                         $this->write_perms = false;
                     }
                 }
                 else if ($this->debug_mode) {
-                    print_r($error_string);
+                    $this->returnLogger()->error($error_string);
                 }
             }
             $this->buffer = array();

@@ -48,8 +48,10 @@ class FileEmitter extends Emitter {
      * @param int|float|null $timeout
      * @param int|null $buffer_size
      * @param bool|null $debug
+     * @param LoggerInterface|null $logger
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false, $logger = NULL) {
+        $this->setupLogger($logger);
 
         // Set error handler to catch warnings
         $this->warning_handler();
@@ -62,14 +64,14 @@ class FileEmitter extends Emitter {
         $this->log_file = $this->initLogFile();
         if (!is_resource($this->log_file)) {
             $this->fatal_error_occured = true;
-            print_r("Error: Unable to construct event log files: ".$this->log_file."\n");
+            $this->returnLogger()->error("Error: Unable to construct event log files: ".$this->log_file."\n");
         }
 
         // Creates worker directories and start the background workers
         $res = $this->initWorkers($workers, $timeout);
         if ($res !== true) {
             $this->fatal_error_occured = true;
-            print_r("Error: Unable to construct file emitter without errors: ".$res."\n");
+            $this->returnLogger()->error("Error: Unable to construct file emitter without errors: ".$res."\n");
         }
 
         // Restore error handler back to default
