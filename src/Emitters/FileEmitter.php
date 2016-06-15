@@ -78,7 +78,7 @@ class FileEmitter extends Emitter {
         restore_error_handler();
 
         $buffer = $buffer_size == NULL ? self::WORKER_BUFFER : $buffer_size;
-        $this->setup("file", $debug, $buffer);
+        $this->setup($debug, $buffer);
     }
 
     /**

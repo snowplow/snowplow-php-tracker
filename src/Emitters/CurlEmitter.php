@@ -63,7 +63,7 @@ class CurlEmitter extends Emitter {
             $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::CURL_BUFFER : $buffer_size;
-        $this->setup("curl", $debug, $buffer);
+        $this->setup($debug, $buffer);
     }
 
     /**

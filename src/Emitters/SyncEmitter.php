@@ -56,7 +56,7 @@ class SyncEmitter extends Emitter {
             $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::SYNC_BUFFER : $buffer_size;
-        $this->setup("sync", $debug, $buffer);
+        $this->setup($debug, $buffer);
     }
 
     /**

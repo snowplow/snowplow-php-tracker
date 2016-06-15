@@ -65,7 +65,7 @@ class SocketEmitter extends Emitter {
             $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::SOCKET_BUFFER : $buffer_size;
-        $this->setup("socket", $debug, $buffer);
+        $this->setup($debug, $buffer);
     }
 
     /**

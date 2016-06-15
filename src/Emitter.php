@@ -36,9 +36,6 @@ class Emitter extends Constants {
     // Debug Parameters
 
     private $debug_mode;
-    private $write_perms = true;
-    private $debug_file;
-    private $path;
 
     // Logger
 
@@ -50,11 +47,10 @@ class Emitter extends Constants {
      * - Sets the emitter buffer size
      * - Sets debug mode
      *
-     * @param string $type
      * @param bool $debug
      * @param int $buffer_size
      */
-    public function setup($type, $debug, $buffer_size) {
+    public function setup($debug, $buffer_size) {
         $this->buffer_size = $buffer_size;
 
         // Set error handler to catch warnings
@@ -62,14 +58,6 @@ class Emitter extends Constants {
 
         if ($debug === true) {
             $this->debug_mode = true;
-
-            // If physical logging is set to true
-            if (self::DEBUG_LOG_FILES) {
-                if ($this->initDebug($type) !== true) {
-                    $this->write_perms = false;
-                    $this->returnLogger()->error("Unable to create debug log files: invalid write permissions.");
-                }
-            }
         }
         else {
             $this->debug_mode = false;
@@ -111,25 +99,13 @@ class Emitter extends Constants {
 
             if (is_bool($res) && $res) {
                 $success_string = "Payload sent successfully\nPayload: ".json_encode($buffer)."\n\n";
-                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
-                    if ($this->writeToFile($this->debug_file, $success_string) !== true) {
-                        $this->returnLogger()->debug($success_string);
-                        $this->write_perms = false;
-                    }
-                }
-                else if ($this->debug_mode) {
+                if ($this->debug_mode) {
                     $this->returnLogger()->debug($success_string);
                 }
             }
             else {
                 $error_string = $res."\nPayload: ".json_encode($buffer)."\n\n";
-                if ($this->debug_mode && self::DEBUG_LOG_FILES && $this->write_perms) {
-                    if ($this->writeToFile($this->debug_file, $error_string) !== true) {
-                        $this->returnLogger()->error($error_string);
-                        $this->write_perms = false;
-                    }
-                }
-                else if ($this->debug_mode) {
+                if ($this->debug_mode) {
                     $this->returnLogger()->error($error_string);
                 }
             }
@@ -171,16 +147,6 @@ class Emitter extends Constants {
 
             // Turn off debug_mode
             $this->debug_mode = false;
-
-            // If log files, write permissions and closure of file resource are all true
-            if (self::DEBUG_LOG_FILES && $this->write_perms) {
-                $this->closeFile($this->debug_file);
-
-                // If set to true delete the log file as well
-                if ($deleteLocal) {
-                    $this->deleteFile($this->path);
-                }
-            }
         }
     }
 
@@ -339,54 +305,5 @@ class Emitter extends Constants {
      */
     public function returnDebugMode() {
         return $this->debug_mode;
-    }
-
-    /**
-     * Returns the emitter debug file
-     *
-     * @return resource|null
-     */
-    public function returnDebugFile() {
-        return $this->debug_file;
-    }
-
-    // Debug Functions
-
-    /**
-     * Initialize Debug Logging Paths and Files
-     *
-     * @param string $emitter_type - Type of emitter we are logging for
-     */
-    private function initDebug($emitter_type) {
-        $this->debug_mode = true;
-        $id = uniqid("", true);
-
-        // If the debug files were created successfully...
-        if ($this->initDebugLogFiles($id, $emitter_type) === true) {
-            $debug_header = "Event Log File\nEmitter: ".$emitter_type."\nID: ".$id."\n\n";
-            return $this->writeToFile($this->debug_file, $debug_header);
-        }
-        return false;
-    }
-
-    /**
-     * Creates the debug log files
-     *
-     * @param string $id - Random id for the log file
-     * @param string $type - Type of emitter we are logging for
-     * @return bool - Whether or not debug file init was successful
-     */
-    private function initDebugLogFiles($id, $type) {
-        $debug_dir = dirname(__DIR__)."/debug";
-        $this->path = $debug_dir."/".$type."-events-log-".$id.".log";
-
-        // Attempt to make the debug directory and open the log file
-        if ($this->makeDir($debug_dir) === true) {
-            $this->debug_file = $this->openFile($this->path);
-            if ($this->debug_file !== false) {
-                return true;
-            }
-        }
-        return false;
     }
 }
