@@ -148,6 +148,15 @@ class Subject extends Constants {
         $this->tracker_settings["duid"] = $domainUserId;
     }
 
+    /**
+     * Sets the session ID
+     *
+     * @param string $sessionId
+     */
+    public function setSessionId($sessionId) {
+        $this->tracker_settings["sid"] = $sessionId;
+    }
+
     // Subject Return Functions
     
     public function returnTrackerSettings() {
