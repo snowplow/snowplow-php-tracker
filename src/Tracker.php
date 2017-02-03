@@ -23,7 +23,7 @@
 
 namespace Snowplow\Tracker;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 class Tracker extends Constants {
 
