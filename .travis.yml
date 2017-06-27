@@ -13,7 +13,7 @@ before_install:
   - sudo apt-get install npm
 
 install:
-  - npm install -g mountebank --production
+  - npm install -g mountebank@1.2.30 --production
 
 before_script:
   - mb &
