@@ -14,12 +14,12 @@
     },
     "require": {
         "rmccue/requests": ">=1.0",
-        "ramsey/uuid": "^3"
+        "ramsey/uuid": "^3",
         "psr/log": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "4.5.*",
-        "satooshi/php-coveralls": "^2"
+        "php-coveralls/php-coveralls": "^2"
     },
     "autoload": {
         "psr-4": {
