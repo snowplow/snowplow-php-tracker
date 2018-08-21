@@ -44,8 +44,10 @@ class CurlEmitter extends Emitter {
      * @param string|null $type
      * @param int|null $buffer_size
      * @param bool $debug
+     * @param LoggerInterface|null $logger
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $logger = NULL) {
+        $this->setupLogger($logger);
         $this->type           = $this->getRequestType($type);
         $this->url            = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
@@ -61,7 +63,7 @@ class CurlEmitter extends Emitter {
             $this->debug = false;
         }
         $buffer = $buffer_size == NULL ? self::CURL_BUFFER : $buffer_size;
-        $this->setup("curl", $debug, $buffer);
+        $this->setup($debug, $buffer);
     }
 
     /**
