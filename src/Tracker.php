@@ -23,12 +23,12 @@
 
 namespace Snowplow\Tracker;
 
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 
 class Tracker extends Constants {
 
     // Tracker Parameters
-    
+
     private $subject;
     private $emitters;
     private $encode_base64;
@@ -69,7 +69,7 @@ class Tracker extends Constants {
     }
 
     // Setter Functions
-    
+
     /**
      * Updates the subject of the tracker with a new subject
      *

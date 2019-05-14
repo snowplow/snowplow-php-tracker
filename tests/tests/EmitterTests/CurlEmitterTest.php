@@ -23,11 +23,12 @@
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\CurlEmitter;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the functionality of the Curl emitter
  */
-class CurlEmitterTest extends PHPUnit_Framework_TestCase {
+class CurlEmitterTest extends TestCase {
 
     // Helper Functions & Values
 
@@ -37,9 +38,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         foreach($emitters as $emitter) {
             $results = $emitter->returnRequestResults();
             foreach ($results as $result) {
-                if ($result["code"] != 0) {
-                    $this->assertEquals($code, $result["code"]);
-                }
+                $this->assertEquals($code, $result["code"]);
             }
         }
     }
@@ -65,7 +64,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $tracker->flushEmitters();
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $this->requestResultAssert($tracker->returnEmitters(), 0);
         $tracker->turnOffDebug(true);
     }
 
@@ -78,7 +77,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $tracker->flushEmitters();
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $this->requestResultAssert($tracker->returnEmitters(), 0);
         $tracker->turnOffDebug(true);
     }
 

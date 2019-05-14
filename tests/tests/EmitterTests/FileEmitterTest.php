@@ -23,11 +23,12 @@
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Emitters\FileEmitter;
 use Snowplow\Tracker\Subject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the functionality of the File emitter
  */
-class FileEmitterTest extends PHPUnit_Framework_TestCase {
+class FileEmitterTest extends TestCase {
 
     // Helper Functions & Values
 
@@ -52,7 +53,12 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
+
         $tracker->flushEmitters();
+
+        foreach ($tracker->returnEmitters() as $emitter) {
+            $this->assertNotEmpty($emitter->returnUrl());
+        }
     }
 
     public function testFileGetForceFlush() {
@@ -63,8 +69,12 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
         }
         $tracker->flushEmitters();
 
+        foreach ($tracker->returnEmitters() as $emitter) {
+            $this->assertNotEmpty($emitter->returnUrl());
+        }
+
         // Will not do anything but we need to ensure
-        // that if we have a file emitter it will not 
+        // that if we have a file emitter it will not
         // cause an error.
         $tracker->turnOffDebug(true);
     }
@@ -76,6 +86,10 @@ class FileEmitterTest extends PHPUnit_Framework_TestCase {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
         }
         $tracker->flushEmitters();
+
+        foreach ($tracker->returnEmitters() as $emitter) {
+            $this->assertNotEmpty($emitter->returnUrl());
+        }
     }
 
     public function testBadType() {

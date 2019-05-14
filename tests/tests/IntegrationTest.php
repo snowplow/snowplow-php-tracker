@@ -25,17 +25,18 @@ use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Emitters\CurlEmitter;
+use PHPUnit\Framework\TestCase;
 
 /**
  * This test asserts that for every type of event the tracker
  * can record we are getting the desired output.
- * 
+ *
  * Tests every event type for:
  * - Sync Emitter
  * - Socket Emitter
  * - Curl Emitter
  */
-class IntegrationTest extends PHPUnit_Framework_TestCase {
+class IntegrationTest extends TestCase {
 
     // Helper Functions & Values
 

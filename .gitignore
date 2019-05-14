@@ -3,3 +3,5 @@ composer.phar
 vendor
 debug
 temp
+build
+.phpunit.result.cache

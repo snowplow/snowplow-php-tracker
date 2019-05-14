@@ -21,12 +21,13 @@
 */
 
 use Snowplow\Tracker\Payload;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the functions used to construct the event
  * payloads
  */
-class PayloadTest extends PHPUnit_Framework_TestCase {
+class PayloadTest extends TestCase {
 
     public function testPayloadAdd() {
         $event_payload = new Payload();
