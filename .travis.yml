@@ -1,9 +1,8 @@
 language: php
 
 php:
-  - "5.5"
-  - "5.4"
-  - "5.3"
+  - "7.2"
+  - "7.3"
 
 before_install:
   - sudo apt-get update
@@ -20,7 +19,7 @@ before_script:
 
 script:
   - "curl -X POST -d @tests/mountebank_mocks/imposter.json http://localhost:2525/imposters"
-  - phpunit
+  - php vendor/bin/phpunit
 
 after_script:
   - php vendor/bin/coveralls -v

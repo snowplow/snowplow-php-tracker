@@ -24,11 +24,12 @@ use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Emitters\CurlEmitter;
 use Snowplow\Tracker\Emitters\SocketEmitter;
 use Snowplow\Tracker\Emitters\FileEmitter;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the creation of all the emitters.
  */
-class EmitterTest extends PHPUnit_Framework_TestCase {
+class EmitterTest extends TestCase {
 
     public function testCurlEmitterInit() {
         $emitter = new CurlEmitter("collecter.acme.au", false, "GET", 1, false);

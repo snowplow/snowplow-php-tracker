@@ -19,6 +19,13 @@ With this tracker you can collect event data from your PHP based applications, g
 | ![i1] [techdocs-image]          | ![i2] [setup-image]       | ![i3] [roadmap-image]   | ![i4] [contributing-image]        |
 | **[Technical Docs] [techdocs]** | **[Setup Guide] [setup]** | **[Roadmap] [roadmap]** | **[Contributing] [contributing]** |
 
+## Run tests
+
+* Clone this repo
+* run `cd <project_path>`
+* run `docker-compose run --rm snowplow composer.phar install`
+* run `docker-compose run --rm snowplow script/tests.sh`
+
 ## Copyright and license
 
 The Snowplow PHP Tracker is copyright 2014 Snowplow Analytics Ltd.
