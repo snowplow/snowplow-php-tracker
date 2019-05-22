@@ -6,7 +6,7 @@ PHP Analytics for Snowplow
 [![Total Downloads][packagist-image-2]][packagist-2]
 [![Dependency Status][versioneye-image]][versioneye]
 
-##Overview
+## Overview
 
 Add analytics into your PHP apps and scripts with the **[Snowplow][1]** event tracker for **[PHP][2]**.
 
@@ -14,10 +14,9 @@ With this tracker you can collect event data from your PHP based applications, g
 
 ## Find out more
 
-| Technical Docs                  | Setup Guide               | Roadmap                 | Contributing                      |
-|---------------------------------|---------------------------|-------------------------|-----------------------------------|
-| ![i1] [techdocs-image]          | ![i2] [setup-image]       | ![i3] [roadmap-image]   | ![i4] [contributing-image]        |
-| **[Technical Docs] [techdocs]** | **[Setup Guide] [setup]** | **[Roadmap] [roadmap]** | **[Contributing] [contributing]** |
+| **[Technical Docs][techdocs]** | **[Setup Guide][setup]** | **[Roadmap][roadmap]** | **[Contributing][contributing]** |
+|:------------------------------:|:------------------------:|:----------------------:|:--------------------------------:|
+| ![i1][techdocs-image]          | ![i2][setup-image]       | ![i3][roadmap-image]   | ![i4][contributing-image]        |
 
 ## Run tests
 
