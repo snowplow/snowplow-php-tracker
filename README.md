@@ -12,24 +12,25 @@ Add analytics into your PHP apps and scripts with the **[Snowplow][1]** event tr
 
 With this tracker you can collect event data from your PHP based applications, games and frameworks.
 
+## Quickstart & Testing
+Make sure `docker` & `docker-compose` are installed.
+
+* `git clone git@github.com:snowplow/snowplow-php-tracker.git`
+* `cd snowplow-php-tracker`
+* `docker-compose run --rm snowplow composer.phar install`
+* `docker-compose run --rm snowplow script/tests.sh`
+
 ## Find out more
 
 | **[Technical Docs][techdocs]** | **[Setup Guide][setup]** | **[Roadmap][roadmap]** | **[Contributing][contributing]** |
 |:------------------------------:|:------------------------:|:----------------------:|:--------------------------------:|
 | ![i1][techdocs-image]          | ![i2][setup-image]       | ![i3][roadmap-image]   | ![i4][contributing-image]        |
 
-## Run tests
-
-* Clone this repo
-* run `cd <project_path>`
-* run `docker-compose run --rm snowplow composer.phar install`
-* run `docker-compose run --rm snowplow script/tests.sh`
-
 ## Copyright and license
 
 The Snowplow PHP Tracker is copyright 2014-2019 Snowplow Analytics Ltd.
 
-Licensed under the **[Apache License, Version 2.0] [license]** (the "License");
+Licensed under the **[Apache License, Version 2.0][license]** (the "License");
 you may not use this software except in compliance with the License.
 
 Unless required by applicable law or agreed to in writing, software
@@ -43,8 +44,8 @@ limitations under the License.
 
 [travis]: https://travis-ci.org/snowplow/snowplow-php-tracker
 [travis-image]: https://travis-ci.org/snowplow/snowplow-php-tracker.svg?branch=master
-[coveralls]: https://coveralls.io/r/snowplow/snowplow-php-tracker?branch=master
-[coveralls-image]: https://coveralls.io/repos/snowplow/snowplow-php-tracker/badge.png?branch=master
+[coveralls]: https://coveralls.io/github/snowplow/snowplow-php-tracker?branch=master
+[coveralls-image]: https://coveralls.io/repos/github/snowplow/snowplow-php-tracker/badge.svg?branch=master
 
 [packagist-1]: https://packagist.org/packages/snowplow/snowplow-tracker
 [packagist-image-1]: https://poser.pugx.org/snowplow/snowplow-tracker/v/stable.png
