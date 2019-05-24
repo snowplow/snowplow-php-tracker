@@ -5,7 +5,6 @@ PHP Analytics for Snowplow
 [![Latest Stable Version][packagist-image-1]][packagist-1]
 [![Total Downloads][packagist-image-2]][packagist-2]
 [![License][license-image]][license]
-[![Dependency Status][versioneye-image]][versioneye]
 
 ## Overview
 
@@ -46,8 +45,6 @@ limitations under the License.
 [travis-image]: https://travis-ci.org/snowplow/snowplow-php-tracker.svg?branch=master
 [coveralls]: https://coveralls.io/r/snowplow/snowplow-php-tracker?branch=master
 [coveralls-image]: https://coveralls.io/repos/snowplow/snowplow-php-tracker/badge.png?branch=master
-[versioneye]: https://www.versioneye.com/user/projects/542ac2c1fc3f5c175f000035
-[versioneye-image]: https://www.versioneye.com/user/projects/542ac2c1fc3f5c175f000035/badge.svg?style=flat
 
 [packagist-1]: https://packagist.org/packages/snowplow/snowplow-tracker
 [packagist-image-1]: https://poser.pugx.org/snowplow/snowplow-tracker/v/stable.png
