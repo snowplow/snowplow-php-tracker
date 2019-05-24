@@ -171,7 +171,7 @@ class SyncEmitter extends Emitter {
      * @return array - POST Request formatted array
      */
     private function getPostRequest($buffer) {
-        $data = array("schema" => self::POST_REQ_SCEHMA, "data" => $buffer);
+        $data = array("schema" => self::POST_REQ_SCHEMA, "data" => $buffer);
         return $data;
     }
 

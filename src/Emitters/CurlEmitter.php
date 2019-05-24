@@ -214,7 +214,7 @@ class CurlEmitter extends Emitter {
      * @return string - Returns a json_encoded string with all of the events to be sent.
      */
     private function getPostRequest($buffer) {
-        $data = json_encode(array("schema" => self::POST_REQ_SCEHMA, "data" => $buffer));
+        $data = json_encode(array("schema" => self::POST_REQ_SCHEMA, "data" => $buffer));
         return $data;
     }
 
