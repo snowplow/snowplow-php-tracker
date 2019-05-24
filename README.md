@@ -27,7 +27,7 @@ With this tracker you can collect event data from your PHP based applications, g
 
 ## Copyright and license
 
-The Snowplow PHP Tracker is copyright 2014 Snowplow Analytics Ltd.
+The Snowplow PHP Tracker is copyright 2014-2019 Snowplow Analytics Ltd.
 
 Licensed under the **[Apache License, Version 2.0] [license]** (the "License");
 you may not use this software except in compliance with the License.
