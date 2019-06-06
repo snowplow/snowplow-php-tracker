@@ -1,3 +1,15 @@
+Version 0.3.0 (2019-06-06)
+--------------------------
+Fix coverall setup (#79)
+Add setPageUrl & setRefr to Subject (#78)
+Remove VersionEye from README (#77)
+Add License button to README (#45)
+Update copyright notices to 2014-2019 (#37)
+Fix typo POST_REQ_SCEHMA (#34)
+Fix markdown alignment in README (#76)
+Flesh out predicates in Mountebank stubs (#66)
+Bump PHP version to 7.2 & update dependencies (#74)
+
 Version 0.2.1 (2015-02-09)
 --------------------------
 Fixed uniqid not generating valid UUID, thanks @mlively! (#39)

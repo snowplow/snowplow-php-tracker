@@ -2,7 +2,7 @@
 /*
     TrackerTest.php
 
-    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,13 +16,14 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Subject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the basic use-cases of the Tracker
@@ -32,11 +33,20 @@ use Snowplow\Tracker\Subject;
  * - Changing the Tracker's subject
  * - Changing Subject information from the Tracker
  */
-class TrackerTest extends PHPUnit_Framework_TestCase {
+class TrackerTest extends TestCase {
+
+    /** @var SyncEmitter */
+    private $e1;
+
+    /** @var SyncEmitter */
+    private $e2;
+
+    /** @var Subject */
+    private $s1;
 
     // Helper Functions
-    
-    public function __construct() {
+
+    protected function setUp(): void {
         // Make multiple emitters
         $this->e1 = $this->getSyncEmitter("GET");
         $this->e2 = $this->getSyncEmitter("POST");
@@ -57,7 +67,7 @@ class TrackerTest extends PHPUnit_Framework_TestCase {
         // Asserts
         $this->assertEquals($this->s1, $tracker->returnSubject());
         $this->assertEquals(false, $tracker->returnEncodeBase64());
-        $this->assertEquals(array("tv" => "php-0.2.1", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
+        $this->assertEquals(array("tv" => "php-0.3.0", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
         $tracker->turnOffDebug(true);
     }
 

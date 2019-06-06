@@ -2,7 +2,7 @@
 /*
     SocketEmitter.php
 
-    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,7 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -238,7 +238,7 @@ class SocketEmitter extends Emitter {
      * @return string - Returns a json_encoded string with all of the events to be sent.
      */
     private function getPostRequest($buffer) {
-        $data = json_encode(array("schema" => self::POST_REQ_SCEHMA, "data" => $buffer));
+        $data = json_encode(array("schema" => self::POST_REQ_SCHEMA, "data" => $buffer));
         return $data;
     }
 

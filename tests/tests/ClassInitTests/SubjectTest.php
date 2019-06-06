@@ -2,7 +2,7 @@
 /*
     SubjectTest.php
 
-    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,21 +16,25 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
 use Snowplow\Tracker\Subject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests all of the functions for adding information
  * into the Tracker Subject.
  */
-class SubjectTest extends PHPUnit_Framework_TestCase {
+class SubjectTest extends TestCase {
+
+    /** @var Subject */
+    private $subject;
 
     // Helper Functions
 
-    public function __construct() {
+    protected function setUp(): void {
         $this->subject = new Subject();
     }
 

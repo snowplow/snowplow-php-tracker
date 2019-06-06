@@ -2,7 +2,7 @@
 /*
     Constants.php
 
-    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,7 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -46,13 +46,13 @@ class Constants {
      * - SSL: the default for whether or not to use SSL Encryption
      * - Type: the default for what type of request the emitter will be making (POST or GET)
      */
-    const TRACKER_VERSION       = "php-0.2.1";
+    const TRACKER_VERSION       = "php-0.3.0";
     const DEFAULT_BASE_64       = true;
     const DEBUG_LOG_FILES       = true;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
     const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
     const SCREEN_VIEW_SCHEMA    = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
-    const POST_REQ_SCEHMA       = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2";
+    const POST_REQ_SCHEMA       = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2";
     const DEFAULT_PLATFORM      = "srv";
     const POST_PATH             = "/com.snowplowanalytics.snowplow/tp2";
     const POST_CONTENT_TYPE     = "application/json; charset=utf-8";

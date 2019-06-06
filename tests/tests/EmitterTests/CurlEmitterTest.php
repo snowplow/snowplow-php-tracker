@@ -2,7 +2,7 @@
 /*
     CurlEmitterTest.php
 
-    Copyright (c) 2014 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,18 +16,19 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
 use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Subject;
 use Snowplow\Tracker\Emitters\CurlEmitter;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests the functionality of the Curl emitter
  */
-class CurlEmitterTest extends PHPUnit_Framework_TestCase {
+class CurlEmitterTest extends TestCase {
 
     // Helper Functions & Values
 
@@ -37,9 +38,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         foreach($emitters as $emitter) {
             $results = $emitter->returnRequestResults();
             foreach ($results as $result) {
-                if ($result["code"] != 0) {
-                    $this->assertEquals($code, $result["code"]);
-                }
+                $this->assertEquals($code, $result["code"]);
             }
         }
     }
@@ -65,7 +64,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $tracker->flushEmitters();
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $this->requestResultAssert($tracker->returnEmitters(), 0);
         $tracker->turnOffDebug(true);
     }
 
@@ -78,7 +77,7 @@ class CurlEmitterTest extends PHPUnit_Framework_TestCase {
         $tracker->flushEmitters();
 
         //Asserts
-        $this->requestResultAssert($tracker->returnEmitters(), 404);
+        $this->requestResultAssert($tracker->returnEmitters(), 0);
         $tracker->turnOffDebug(true);
     }
 
