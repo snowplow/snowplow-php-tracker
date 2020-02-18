@@ -68,6 +68,14 @@ class SubjectTest extends TestCase {
         $this->assertEquals("user_id_1", $settings["uid"]);
     }
 
+    public function testAddSessionId() {
+        $sessionId = '50656436-A73A-4C4C-BBDF-604BCAC8D907';
+        $this->subject->setSessionId($sessionId);
+        $settings = $this->getTrackerSettings();
+        $this->assertArrayHasKey("sid", $settings);
+        $this->assertEquals($sessionId, $settings["sid"]);
+    }
+
     public function testAddScreenRes() {
         $this->subject->setScreenResolution(1024, 768);
         $settings = $this->getTrackerSettings();

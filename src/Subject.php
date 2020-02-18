@@ -66,6 +66,15 @@ class Subject extends Constants {
     }
 
     /**
+     * Sets a custom session identification for the event
+     *
+     * @param string $sessionId
+     */
+    public function setSessionId($sessionId) {
+        $this->tracker_settings["sid"] = $sessionId;
+    }
+
+    /**
      * Sets the screen resolution
      *
      * @param int $width
@@ -167,7 +176,7 @@ class Subject extends Constants {
     }
 
     // Subject Return Functions
-    
+
     public function returnTrackerSettings() {
         return $this->tracker_settings;
     }
