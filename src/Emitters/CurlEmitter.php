@@ -2,7 +2,7 @@
 /*
     CurlEmitter.php
 
-    Copyright (c) 2014-2019 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2021 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,7 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014-2019 Snowplow Analytics Ltd
+    Copyright: Copyright (c) 2014-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -70,7 +70,7 @@ class CurlEmitter extends Emitter {
      * - Or force the execution of the curl emitter
      *
      * @param $buffer - An array of events we are going to convert into curl resources
-     * @param bool $curl_send - Whether or not we are going to send the buffered curl 
+     * @param bool $curl_send - Whether or not we are going to send the buffered curl
      *                          objects before we reach the limit
      * @return bool|string - Either true or an error string
      */
