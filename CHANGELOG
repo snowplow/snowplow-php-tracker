@@ -1,3 +1,10 @@
+Version 0.3.1 (2021-02-17)
+--------------------------
+Update copyright notices to 2021 (#92)
+Fix expected hash in Dockerfile (#90)
+Migrate to GitHub actions (#88)
+Upgrade ramsey/uuid version constraint to allow v3 or v4 (#87)
+
 Version 0.3.0 (2019-06-06)
 --------------------------
 Fix coverall setup (#79)
