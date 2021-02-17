@@ -1,0 +1,60 @@
+name: cd
+
+on:
+  push:
+    tags:
+    - '*.*.*'
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.2'
+        extensions: mbstring
+        coverage: xdebug
+
+    - name: Start mountebank container with imposter
+      run: |
+        docker run -d --rm --mount type=bind,source=$(pwd)/tests/mountebank_mocks,destination=/imposters -p 2525:2525 -p 4545:4545 bbyars/mountebank --configfile /imposters/imposter.json
+        while ! nc -z localhost 2525; do sleep 0.1; done
+
+    - name: Composer
+      run: |
+        composer self-update
+        composer install
+
+    - name: Test and send coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        php vendor/bin/phpunit
+        php vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v
+
+    - name: Get tag and tracker versions
+      id: version
+      run: |
+        echo ::set-output name=TAG_VERSION::${GITHUB_REF#refs/*/}
+        echo "##[set-output name=PHP_TRACKER_VERSION;]$(cat src/Constants.php | sed -n -e 's/^.*TRACKER_VERSION[[:blank:]]*= "php-\(.*\)";/\1/p')"
+
+    - name: Fail if version mismatch
+      if: ${{ steps.version.outputs.TAG_VERSION != steps.version.outputs.PHP_TRACKER_VERSION }}
+      run: |
+        echo "Tag version (${{ steps.version.outputs.TAG_VERSION }}) doesn't match version in project (${{ steps.version.outputs.PHP_TRACKER_VERSION }})"
+        exit 1
+
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+        draft: false
+        prerelease: ${{ contains(steps.version.outputs.TAG_VERSION, '-rc') }}

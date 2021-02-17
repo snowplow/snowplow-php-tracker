@@ -1,0 +1,39 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.2'
+        extensions: mbstring
+        coverage: xdebug
+
+    - name: Start mountebank container with imposter
+      run: |
+        docker run -d --rm --mount type=bind,source=$(pwd)/tests/mountebank_mocks,destination=/imposters -p 2525:2525 -p 4545:4545 bbyars/mountebank --configfile /imposters/imposter.json
+        while ! nc -z localhost 2525; do sleep 0.1; done
+
+    - name: Composer
+      run: |
+        composer self-update
+        composer install
+
+    - name: Test and send coverage
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        php vendor/bin/phpunit
+        php vendor/bin/php-coveralls --coverage_clover=build/logs/clover.xml -v

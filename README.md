@@ -1,7 +1,7 @@
 # PHP Analytics for Snowplow
 
 [![early-release]][tracker-classificiation]
-[![Build Status][travis-image]][travis]
+[![Build Status][gh-actions-image]][gh-actions]
 [![Coverage Status][coveralls-image]][coveralls]
 [![Latest Stable Version][packagist-image-1]][packagist-1]
 [![Total Downloads][packagist-image-2]][packagist-2]
@@ -44,8 +44,8 @@ limitations under the License.
 [1]: https://snowplowanalytics.com/
 [2]: https://php.net/
 
-[travis]: https://travis-ci.org/snowplow/snowplow-php-tracker
-[travis-image]: https://travis-ci.org/snowplow/snowplow-php-tracker.svg?branch=master
+[gh-actions]: https://github.com/snowplow/snowplow-php-tracker/actions
+[gh-actions-image]: https://github.com/snowplow/snowplow-php-tracker/workflows/ci/badge.svg?branch=master
 [coveralls]: https://coveralls.io/github/snowplow/snowplow-php-tracker?branch=master
 [coveralls-image]: https://coveralls.io/repos/github/snowplow/snowplow-php-tracker/badge.svg?branch=master
 
