@@ -1,5 +1,5 @@
-Version 0.3.1 (2021-02-17)
---------------------------
+Version 0.3.1-rc1 (2021-02-17)
+------------------------------
 Update copyright notices to 2021 (#92)
 Fix expected hash in Dockerfile (#90)
 Migrate to GitHub actions (#88)
