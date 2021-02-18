@@ -1,0 +1,19 @@
+name: Snyk
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  security:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/php@master
+      with:
+        command: monitor
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
