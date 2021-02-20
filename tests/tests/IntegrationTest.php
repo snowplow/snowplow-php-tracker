@@ -40,7 +40,7 @@ class IntegrationTest extends TestCase {
 
     // Helper Functions & Values
 
-    private $payload_schema = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2";
+    private $payload_schema = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4";
 
     // Tracker, Emitter & Context Builders
 

@@ -52,7 +52,7 @@ class Constants {
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
     const UNSTRUCT_EVENT_SCHEMA = "iglu:com.snowplowanalytics.snowplow/unstruct_event/jsonschema/1-0-0";
     const SCREEN_VIEW_SCHEMA    = "iglu:com.snowplowanalytics.snowplow/screen_view/jsonschema/1-0-0";
-    const POST_REQ_SCHEMA       = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-2";
+    const POST_REQ_SCHEMA       = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4";
     const DEFAULT_PLATFORM      = "srv";
     const POST_PATH             = "/com.snowplowanalytics.snowplow/tp2";
     const POST_CONTENT_TYPE     = "application/json; charset=utf-8";

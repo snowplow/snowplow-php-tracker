@@ -242,7 +242,7 @@ function returnCurlRequest($payload, $url, $type) {
  * @return string - Returns a json_encoded string with all of the events to be sent.
  */
 function returnPostRequest($buffer) {
-    $post_req_schema = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-1";
+    $post_req_schema = "iglu:com.snowplowanalytics.snowplow/payload_data/jsonschema/1-0-4";
     $data = json_encode(array("schema" => $post_req_schema, "data" => $buffer));
     return $data;
 }
