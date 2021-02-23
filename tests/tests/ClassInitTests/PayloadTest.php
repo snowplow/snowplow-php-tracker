@@ -29,6 +29,27 @@ use PHPUnit\Framework\TestCase;
  */
 class PayloadTest extends TestCase {
 
+    public function testPayloadConstruct() {
+        $event_payload = new Payload();
+        $array = $event_payload->get();
+
+        // Asserts
+        $this->assertArrayHasKey("dtm", $array);
+        $this->assertTrue(isset($array["dtm"]));
+        $this->assertArrayNotHasKey("ttm", $array);
+    }
+
+    public function testPayloadConstructWithTstamp() {
+        $event_payload = new Payload(1614072292000);
+        $array = $event_payload->get();
+
+        // Asserts
+        $this->assertArrayHasKey("dtm", $array);
+        $this->assertTrue(isset($array["dtm"]));
+        $this->assertArrayHasKey("ttm", $array);
+        $this->assertEquals("1614072292000", $array["ttm"]);
+    }
+
     public function testPayloadAdd() {
         $event_payload = new Payload();
         $event_payload->add("sku", "WM5");
