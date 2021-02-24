@@ -37,6 +37,7 @@ class FileEmitter extends Emitter {
 
     private $worker = 0;
     private $worker_paths = array();
+    private $worker_root;
 
     /**
      * Creates a File Emitter
@@ -54,9 +55,12 @@ class FileEmitter extends Emitter {
         // Set error handler to catch warnings
         $this->warning_handler();
 
+        // The root package directory for worker logs and runs
+        $this->worker_root = dirname(dirname(__DIR__)).'/';
+
         $this->type     = $this->getRequestType($type);
         $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
-        $this->log_dir  = dirname(dirname(__DIR__))."/".self::WORKER_FOLDER;
+        $this->log_dir  = $this->worker_root.self::WORKER_FOLDER;
 
         // Initilize the event log file
         $this->log_file = $this->initLogFile();
@@ -119,7 +123,7 @@ class FileEmitter extends Emitter {
             }
 
             // Reset the log and continue...
-            $this->log_file = $this->openFile($this->log_dir."/events.log");
+            $this->log_file = $this->openFile($this->log_dir."events.log");
             if (!is_resource($this->log_file)) {
                 $this->fatal_error_occured = true;
                 restore_error_handler();
@@ -144,7 +148,7 @@ class FileEmitter extends Emitter {
     private function initLogFile() {
         $res = $this->makeDir($this->log_dir);
         if ($res === true) {
-            $res = $this->openFile($this->log_dir."/events.log");
+            $res = $this->openFile($this->log_dir."events.log");
         }
         return $res;
     }
@@ -192,17 +196,14 @@ class FileEmitter extends Emitter {
      * @param int|null $timeout
      */
     private function makeWorker($worker_num, $timeout) {
-        // Make sure we are in the correct directory level to execute our command
-        chdir(dirname(dirname(__DIR__)));
-
         // Grab worker settings from Constants class
         $timeout = $timeout    == NULL   ? self::WORKER_TIMEOUT : $timeout;
         $window  = $this->type == "POST" ? self::WORKER_WINDOW_POST : self::WORKER_WINDOW_GET;
         $buffer  = $this->type == "POST" ? self::WORKER_BUFFER_POST : self::WORKER_BUFFER_GET;
 
         // Make our worker startup command
-        $cmd = "php Worker.php";
-        $cmd.= " --file_path ".self::WORKER_FOLDER."w".$worker_num."/";
+        $cmd = "php ".$this->worker_root."Worker.php";
+        $cmd.= " --file_path ".$this->log_dir."w".$worker_num."/";
         $cmd.= " --url ".$this->url;
         $cmd.= " --type ".$this->type;
         $cmd.= " --timeout ".$timeout;
