@@ -70,7 +70,7 @@ class SyncEmitter extends Emitter {
             if ($type == "GET") {
                 $res_ = "";
                 foreach ($buffer as $payload) {
-                    $res = $this->getRequest($payload);
+                    $res = $this->getRequest($this->updateStm($payload));
                     if (!is_bool($res)) {
                         $res_.= $res;
                     }
@@ -80,7 +80,7 @@ class SyncEmitter extends Emitter {
                 }
             }
             else if ($type == "POST") {
-                $data = $this->getPostRequest($buffer);
+                $data = $this->getPostRequest($this->batchUpdateStm($buffer));
                 $res = $this->postRequest($data);
             }
             return $res;

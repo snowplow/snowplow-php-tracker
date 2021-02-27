@@ -328,6 +328,27 @@ class Emitter extends Constants {
         return $this->debug_file;
     }
 
+    /**
+     * Returns the event payload with current time as stm.
+     *
+     * @param array $payload
+     * @return array - Updated event payload
+     */
+    public function updateStm($payload) {
+        $payload["stm"] = strval(time() * 1000);
+        return $payload;
+    }
+
+    /**
+     * Updates all events in buffer with current time as stm.
+     *
+     * @param array $buffer
+     * @return array - Buffer with updated events
+     */
+    public function batchUpdateStm($buffer) {
+        return array_map(array($this, 'updateStm'), $buffer);
+    }
+
     // Debug Functions
 
     /**

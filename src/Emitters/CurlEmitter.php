@@ -32,6 +32,7 @@ class CurlEmitter extends Emitter {
 
     // Curl Specific Parameters
 
+    private $final_payload_buffer = array();
     private $curl_buffer = array();
     private $curl_limit;
     private $rolling_window;
@@ -81,7 +82,44 @@ class CurlEmitter extends Emitter {
         // If the sent buffer contains events...
         if (count($buffer) > 0) {
             if ($type == "POST") {
-                $payload = $this->getPostRequest($buffer);
+                array_push($this->final_payload_buffer, $buffer);
+            }
+            else {
+                foreach ($buffer as $event) {
+                    array_push($this->final_payload_buffer, $event);
+                }
+            }
+        }
+
+        if (count($this->final_payload_buffer) >= $this->curl_limit) {
+            return $this->mkCurlRequests($this->final_payload_buffer, $type, $debug);
+        }
+        else if ($curl_send === true) {
+            if (count($this->final_payload_buffer) > 0) {
+                return $this->mkCurlRequests($this->final_payload_buffer, $type, $debug);
+            }
+            else {
+                return "Error: No curls to send.";
+            }
+        }
+        return "Error: Still adding to the curl buffer; count ".count($this->final_payload_buffer)." - limit ".$this->curl_limit;
+    }
+
+    /**
+     * Makes curl requests from payloads to be sent.
+     *
+     * @param array $payloads - Array of payloads to be sent
+     * @param string $type - Type of requests to be made
+     * @param bool $debug - If debug is on or not
+     * @return bool|string - Returns true or a string of errors
+     */
+    private function mkCurlRequests($payloads, $type, $debug) {
+        // Empty the global buffer.
+        $this->final_payload_buffer = array();
+
+        if ($type == 'POST') {
+            foreach ($payloads as $buffer) {
+                $payload = $this->getPostRequest($this->batchUpdateStm($buffer));
                 $curl = $this->getCurlRequest($payload, $type);
                 array_push($this->curl_buffer, $curl);
 
@@ -90,27 +128,15 @@ class CurlEmitter extends Emitter {
                     array_push($this->debug_payloads, array("handle" => $curl, "payload" => $payload));
                 }
             }
-            else {
-                foreach ($buffer as $event) {
-                    $payload = http_build_query($event);
-                    $curl = $this->getCurlRequest($payload, $type);
-                    array_push($this->curl_buffer, $curl);
-                }
+        }
+        else {
+            foreach ($payloads as $event) {
+                $payload = http_build_query($this->updateStm($event));
+                $curl = $this->getCurlRequest($payload, $type);
+                array_push($this->curl_buffer, $curl);
             }
         }
-
-        if (count($this->curl_buffer) >= $this->curl_limit) {
-            return $this->rollingCurl($this->curl_buffer, $debug);
-        }
-        else if ($curl_send === true) {
-            if (count($this->curl_buffer) > 0) {
-                return $this->rollingCurl($this->curl_buffer, $debug);
-            }
-            else {
-                return "Error: No curls to send.";
-            }
-        }
-        return "Error: Still adding to the curl buffer; count ".count($this->curl_buffer)." - limit ".$this->curl_limit;
+        return $this->rollingCurl($this->curl_buffer, $debug);
     }
 
     /**

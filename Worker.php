@@ -70,8 +70,9 @@ while ($loop && $count < 5) {
         $path = $dir.$path;
         $path = renameEventsLog($path);
 
-        // Consume and send events in the file
-        $curl_buffer = consumeFile($url, $path, $type, $buffer_size);
+        // Consume, update sent tstamp and send events in the file
+        $final_payload_buffer = consumeFile($path, $type, $buffer_size);
+        $curl_buffer = mkCurls($final_payload_buffer, $url, $type);
         $ret = execute($curl_buffer, $rolling_window);
 
         // If any of the curls failed copy the log-file to the failed directory
@@ -158,23 +159,24 @@ function renameEventsLog($path) {
 }
 
 /**
- * Consumes the events file
- * - fires the rolling curl function
+ * Consumes the events file, adds the sent tstamp
+ * The final_payload_buffer is:
+ *  - either an array of events (GET)
+ *  - or an array of payloads of events
  *
- * @param string $url
  * @param string $file
  * @param string $type
  * @param int $buffer_size
- * @return bool - Returns the success of the transmission
+ * @return array - The final_payload_buffer
  */
-function consumeFile($url, $file, $type, $buffer_size) {
+function consumeFile($file, $type, $buffer_size) {
     // Get the file contents
     $contents = file_get_contents($file);
     $lines = explode("\n", $contents);
 
-    // Create the payload buffer and curl_buffer
+    // Create the payload buffer and final_payload_buffer
     $buffer = array();
-    $curl_buffer = array();
+    $final_payload_buffer = array();
 
     // Iterate through all of the lines in the log file.
     foreach ($lines as $line) {
@@ -185,21 +187,45 @@ function consumeFile($url, $file, $type, $buffer_size) {
         if ($type == "POST") {
             array_push($buffer, $payload);
             if (count($buffer) >= $buffer_size) {
-                $data = returnPostRequest($buffer);
-                array_push($curl_buffer, returnCurlRequest($data, $url, $type));
+                array_push($final_payload_buffer, $buffer);
                 $buffer = array();
             }
         }
         else {
-            $data = http_build_query($payload);
-            array_push($curl_buffer, returnCurlRequest($data, $url, $type));
+            array_push($final_payload_buffer, $payload);
         }
     }
 
     // If there are any events left over in the buffer or if the buffer_size was bigger than the amount of events
     if (count($buffer) != 0) {
         if ($type == "POST") {
-            $data = returnPostRequest($buffer);
+            array_push($final_payload_buffer, $buffer);
+        }
+    }
+    return $final_payload_buffer;
+}
+
+/**
+ * Makes the curls buffer
+ *
+ * @param array $final_payload_array
+ * @param string $url
+ * @param string $type
+ * @return array - The curl requests buffer
+ */
+function mkCurls($final_payload_array, $url, $type) {
+    // Create the curl buffer
+    $curl_buffer = array();
+
+    if ($type == 'POST') {
+        foreach ($final_payload_array as $buffer) {
+            $data = returnPostRequest(array_map('updateStm', $buffer));
+            array_push($curl_buffer, returnCurlRequest($data, $url, $type));
+        }
+    }
+    else {
+        foreach ($final_payload_array as $event) {
+            $data = http_build_query(updateStm($event));
             array_push($curl_buffer, returnCurlRequest($data, $url, $type));
         }
     }
@@ -248,13 +274,24 @@ function returnPostRequest($buffer) {
 }
 
 /**
+ * Returns the event payload with current time as stm.
+ *
+ * @param array $payload
+ * @return array - Updated event payload
+ */
+function updateStm($payload) {
+    $payload["stm"] = strval(time() * 1000);
+    return $payload;
+}
+
+/**
  * Asynchronously sends curl requests.
  * - Prevents the queue from being held up by
  *   starting new requests as soon as any are done.
  *
  * @param array $curls - array of curls to be sent
  * @param int $rolling_window - amount of concurrent requests
- * @return bool
+ * @return bool - Returns the success of the transmission
  */
 function execute($curls, $rolling_window) {
     $master = curl_multi_init();

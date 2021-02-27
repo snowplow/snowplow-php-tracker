@@ -230,6 +230,7 @@ class IntegrationTest extends TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
+        $this->assertArrayHasKey("stm", $data);
         $this->assertArrayHasKey("tv", $data);
         $this->assertArrayHasKey("p", $data);
         $this->assertArrayHasKey("e", $data);
@@ -253,6 +254,7 @@ class IntegrationTest extends TestCase {
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
+            $this->assertArrayHasKey("stm", $event);
             $this->assertArrayHasKey("tv", $event);
             $this->assertArrayHasKey("p", $event);
             $this->assertArrayHasKey("e", $event);
@@ -272,6 +274,7 @@ class IntegrationTest extends TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
+        $this->assertArrayHasKey("stm", $data);
         $this->assertArrayHasKey("tv", $data);
         $this->assertArrayHasKey("p", $data);
         $this->assertArrayHasKey("e", $data);
@@ -291,6 +294,7 @@ class IntegrationTest extends TestCase {
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
+            $this->assertArrayHasKey("stm", $event);
             $this->assertArrayHasKey("tv", $event);
             $this->assertArrayHasKey("p", $event);
             $this->assertArrayHasKey("e", $event);
@@ -306,6 +310,7 @@ class IntegrationTest extends TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
+        $this->assertArrayHasKey("stm", $data);
         $this->assertArrayHasKey("tv", $data);
         $this->assertArrayHasKey("p", $data);
         $this->assertArrayHasKey("e", $data);
@@ -331,6 +336,7 @@ class IntegrationTest extends TestCase {
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
+            $this->assertArrayHasKey("stm", $event);
             $this->assertArrayHasKey("tv", $event);
             $this->assertArrayHasKey("p", $event);
             $this->assertArrayHasKey("e", $event);
@@ -351,6 +357,7 @@ class IntegrationTest extends TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
+        $this->assertArrayHasKey("stm", $data);
         $this->assertArrayHasKey("tv", $data);
         $this->assertArrayHasKey("p", $data);
         $this->assertArrayHasKey("e", $data);
@@ -370,6 +377,7 @@ class IntegrationTest extends TestCase {
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
+            $this->assertArrayHasKey("stm", $event);
             $this->assertArrayHasKey("tv", $event);
             $this->assertArrayHasKey("p", $event);
             $this->assertArrayHasKey("e", $event);
@@ -384,6 +392,7 @@ class IntegrationTest extends TestCase {
         $data = json_decode($data, true);
         $this->assertArrayHasKey("eid", $data);
         $this->assertArrayHasKey("dtm", $data);
+        $this->assertArrayHasKey("stm", $data);
         $this->assertArrayHasKey("tv", $data);
         $this->assertArrayHasKey("p", $data);
         $this->assertArrayHasKey("e", $data);
@@ -436,6 +445,7 @@ class IntegrationTest extends TestCase {
         foreach ($data as $event) {
             $this->assertArrayHasKey("eid", $event);
             $this->assertArrayHasKey("dtm", $event);
+            $this->assertArrayHasKey("stm", $event);
             $this->assertArrayHasKey("tv", $event);
             $this->assertArrayHasKey("p", $event);
             $this->assertArrayHasKey("e", $event);

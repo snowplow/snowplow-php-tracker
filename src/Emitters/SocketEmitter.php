@@ -80,7 +80,7 @@ class SocketEmitter extends Emitter {
 
             if (is_bool($socket_made) && $socket_made) {
                 if ($type == "POST") {
-                    $data = $this->getPostRequest($buffer);
+                    $data = $this->getPostRequest($this->batchUpdateStm($buffer));
                     $body = $this->getRequestBody($uri, $data, $type);
 
                     // Send requests to the socket
@@ -91,7 +91,7 @@ class SocketEmitter extends Emitter {
                     $res = "";
                     $res_ = "";
                     foreach ($buffer as $event) {
-                        $data = http_build_query($event);
+                        $data = http_build_query($this->updateStm($event));
                         $body = $this->getRequestBody($uri, $data, $type);
 
                         // Send request to the socket

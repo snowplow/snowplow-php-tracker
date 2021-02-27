@@ -62,6 +62,8 @@ class EmitterTest extends TestCase {
     public function testReturnFunctions() {
         $emitter = new SyncEmitter("collecter.acme.au", "http", "GET", 10, false);
         $emitter->addEvent(array("something" => "something"));
+        $payload = array();
+        $payload_updated = $emitter->updateStm($payload);
 
         $this->assertEquals(false,
             $emitter->returnDebugMode());
@@ -69,5 +71,7 @@ class EmitterTest extends TestCase {
             $emitter->returnDebugFile());
         $this->assertEquals(1,
             count($emitter->returnBuffer()));
+        $this->assertArrayHasKey("stm", $payload_updated);
+        $this->assertTrue(is_numeric($payload_updated["stm"]));
     }
 }
