@@ -194,10 +194,10 @@ class Tracker extends Constants {
      * @param string|null $page_title - Page Title
      * @param string|null $referrer - Referral Page
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event Timestamp
+     * @param int|null $timestamp_in_ms - Event Timestamp in milliseconds
      */
-    public function trackPageView($page_url, $page_title = NULL, $referrer = NULL, $context = NULL, $tstamp = NULL) {
-        $ep = new Payload($tstamp);
+    public function trackPageView($page_url, $page_title = NULL, $referrer = NULL, $context = NULL, $timestamp_in_ms = NULL) {
+        $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "pv");
         $ep->add("url", $page_url);
         $ep->add("page", $page_title);
@@ -214,11 +214,11 @@ class Tracker extends Constants {
      * @param string|null $property - Property associated with either the action or the object
      * @param int|float|null $value - A value associated with the user action
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event Timestamp
+     * @param int|null $timestamp_in_ms - Event Timestamp in milliseconds
      */
     public function trackStructEvent($category, $action, $label = NULL, $property = NULL, $value = NULL,
-                                     $context = NULL, $tstamp = NULL) {
-        $ep = new Payload($tstamp);
+                                     $context = NULL, $timestamp_in_ms = NULL) {
+        $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "se");
         $ep->add("se_ca", $category);
         $ep->add("se_ac", $action);
@@ -235,11 +235,11 @@ class Tracker extends Constants {
      *                           - A "data" field containing the event properties and
      *                           - A "schema" field identifying the schema against which the data is validated
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event Timestamp
+     * @param int|null $timestamp_in_ms - Event Timestamp in milliseconds
      */
-    public function trackUnstructEvent($event_json, $context = NULL, $tstamp = NULL) {
+    public function trackUnstructEvent($event_json, $context = NULL, $timestamp_in_ms = NULL) {
         $envelope = array("schema" => self::UNSTRUCT_EVENT_SCHEMA, "data" => $event_json);
-        $ep = new Payload($tstamp);
+        $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "ue");
         $ep->addJson($envelope, $this->encode_base64, "ue_px", "ue_pr");
         $this->track($ep, $context);
@@ -251,9 +251,9 @@ class Tracker extends Constants {
      * @param string|null $name - Event Screen Name
      * @param string|null $id - Event Screen Unique ID
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event Timestamp
+     * @param int|null $timestamp_in_ms - Event Timestamp in milliseconds
      */
-    public function trackScreenView($name = NULL, $id = NULL, $context = NULL, $tstamp = NULL) {
+    public function trackScreenView($name = NULL, $id = NULL, $context = NULL, $timestamp_in_ms = NULL) {
         $screen_view_properties = array();
         if ($name != NULL) {
             $screen_view_properties["name"] = $name;
@@ -262,7 +262,7 @@ class Tracker extends Constants {
             $screen_view_properties["id"] = $id;
         }
         $ep_json = array("schema" => self::SCREEN_VIEW_SCHEMA, "data" => $screen_view_properties);
-        $this->trackUnstructEvent($ep_json, $context, $tstamp);
+        $this->trackUnstructEvent($ep_json, $context, $timestamp_in_ms);
     }
 
     /**
@@ -279,12 +279,12 @@ class Tracker extends Constants {
      * @param string|null $country
      * @param array $items - An array of items which make up the transaction
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event timestamp
+     * @param int|null $timestamp_in_ms - Event timestamp
      */
     public function trackEcommerceTransaction($order_id, $total_value, $currency = NULL, $affiliation = NULL,
                                               $tax_value = NULL, $shipping = NULL, $city = NULL, $state = NULL,
-                                              $country = NULL, $items, $context = NULL, $tstamp = NULL) {
-        $ep = new Payload($tstamp);
+                                              $country = NULL, $items, $context = NULL, $timestamp_in_ms = NULL) {
+        $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "tr");
         $ep->add("tr_id", $order_id);
         $ep->add("tr_tt", $total_value);
@@ -301,7 +301,7 @@ class Tracker extends Constants {
 
         foreach ($items as $item) {
             $this->trackEcommerceTransactionItems($order_id, $item["sku"], $item["price"], $item["quantity"],
-                $item["name"], $item["category"], $currency, $context, $tstamp);
+                $item["name"], $item["category"], $currency, $context, $timestamp_in_ms);
         }
     }
 
@@ -316,11 +316,11 @@ class Tracker extends Constants {
      * @param string|null $category - Product category
      * @param string|null $currency - Currency, inherited from trackEcommerceTransaction
      * @param array|null $context - Event Context
-     * @param int|null $tstamp - Event Timestamp
+     * @param int|null $timestamp_in_ms - Event Timestamp in milliseconds
      */
     private function trackEcommerceTransactionItems($order_id, $sku, $price, $quantity, $name = NULL, $category = NULL,
-                                                    $currency = NULL, $context = NULL, $tstamp = NULL) {
-        $ep = new Payload($tstamp);
+                                                    $currency = NULL, $context = NULL, $timestamp_in_ms = NULL) {
+        $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "ti");
         $ep->add("ti_id", $order_id);
         $ep->add("ti_pr", $price);

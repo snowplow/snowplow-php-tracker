@@ -32,16 +32,16 @@ class Payload extends Constants {
     /**
      * Constructs a Payload object, contains an array in which event parameters are stored
      *
-     * @param int|null $tstamp - Unix timestamp in milliseconds
+     * @param int|null $timestamp_in_ms - Unix timestamp in milliseconds
      */
-    public function __construct($tstamp = NULL) {
+    public function __construct($timestamp_in_ms = NULL) {
         // Construct a name-value pairs array
         $this->nv_pairs = array();
 
         // Add Time Stamp(s) to array on event creation
         $this->add("dtm", $_SERVER['REQUEST_TIME'] * 1000);
-        if ($tstamp != NULL) {
-            $this->add("ttm", $tstamp);
+        if ($timestamp_in_ms != NULL) {
+            $this->add("ttm", $timestamp_in_ms);
         }
     }
 
