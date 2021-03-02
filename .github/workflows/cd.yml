@@ -55,6 +55,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: ${{ github.ref }}
+        release_name: Version ${{ github.ref }}
         draft: false
         prerelease: ${{ contains(steps.version.outputs.TAG_VERSION, '-rc') }}

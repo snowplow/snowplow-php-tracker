@@ -1,3 +1,17 @@
+Version 0.4.0 (2021-03-02)
+--------------------------
+Required parameters after optional parameters deprecated in PHP 8.0 (closes #97)
+Lock Mountebank to v2.4.0 (#67)
+Remove deprecated errcontext from custom error handler (#95)
+Switch to version 4 UUIDs (#94)
+Remove rmccue/requests library as it is only used for Synchronous emitter (#42)
+Make clearer to users that the optional timestamp argument should be provided in milliseconds (#71)
+Add support for dvce_sent_tstamp (#56)
+Remove use of chdir() in FileEmitter (#81)
+Make optional timestamp argument set 'true timestamp' rather than 'device created timestamp' (#59)
+Review schema versions in Constants.php (#83)
+Add Snyk Integration (#93)
+
 Version 0.3.1 (2021-02-18)
 --------------------------
 Update copyright notices to 2021 (#92)
