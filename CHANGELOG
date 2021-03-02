@@ -1,5 +1,5 @@
-Version 0.4.0 (2021-03-02)
---------------------------
+Version 0.4.0-rc1 (2021-03-02)
+------------------------------
 Required parameters after optional parameters deprecated in PHP 8.0 (closes #97)
 Lock Mountebank to v2.4.0 (#67)
 Remove deprecated errcontext from custom error handler (#95)
