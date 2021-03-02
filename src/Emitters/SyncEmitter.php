@@ -61,7 +61,7 @@ class SyncEmitter extends Emitter {
      * Sends data with the configured Request type
      *
      * @param array $buffer
-     * @return bool $res
+     * @return bool|string $res - Return true or an error string
      */
     public function send($buffer) {
         if (count($buffer) > 0) {
@@ -70,7 +70,7 @@ class SyncEmitter extends Emitter {
             if ($type == "GET") {
                 $res_ = "";
                 foreach ($buffer as $payload) {
-                    $res = $this->getRequest($this->updateStm($payload));
+                    $res = $this->curlRequest($this->updateStm($payload), $type);
                     if (!is_bool($res)) {
                         $res_.= $res;
                     }
@@ -81,7 +81,7 @@ class SyncEmitter extends Emitter {
             }
             else if ($type == "POST") {
                 $data = $this->getPostRequest($this->batchUpdateStm($buffer));
-                $res = $this->postRequest($data);
+                $res = $this->curlRequest($data, $type);
             }
             return $res;
         }
@@ -91,54 +91,58 @@ class SyncEmitter extends Emitter {
     // Send Functions
 
     /**
-     * Using a GET Request sends the data to a collector
+     * Use cURL to send data to the collector
      *
-     * @param array $data - The array which is going to be sent in the GET Request
-     * @return bool - Return whether the request was successful
+     * @param array $data - Is the array which is going to be sent in the Request
+     * @param string $type - The type of the Request
+     * @return bool|string - Return true if successful request or an error string
      */
-    private function getRequest($data) {
-        try {
-            $r = Requests::get($this->url."?".http_build_query($data));
-            if ($this->debug) {
-                $this->storeRequestResults($r->status_code, $data);
-                if ($r->status_code != 200) {
-                    return "Sync GET Request Failed: ".$r->status_code;
-                }
-            }
-            return true;
-        }
-        catch (Exception $e) {
-            if ($this->debug) {
-                $this->storeRequestResults(404, $data);
-            }
-            return "Sync GET Request Failed: ".$e;
-        }
-    }
+    private function curlRequest($data, $type) {
+        $res = true;
+        $res_ = "";
 
-    /**
-     * Using a POST Request sends the data to a collector
-     *
-     * @param array $data - Is the array which is going to be sent in the POST Request
-     * @return bool - Return whether the request was successful
-     */
-    private function postRequest($data) {
-        $header = array('Content-Type' => self::POST_CONTENT_TYPE);
-        try {
-            $r = Requests::post($this->url, $header, json_encode($data));
+        // Create a cURL handle, set transfer options and execute
+        $ch = curl_init($this->url);
+        if ($type == 'POST') {
+            $json_data = json_encode($data);
+            $header = array(
+                'Content-Type: '.self::POST_CONTENT_TYPE,
+                'Accept: '.self::POST_ACCEPT,
+                'Content-Length: '.strlen($json_data));
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+        }
+        else {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
+            curl_setopt($ch, CURLOPT_URL, $this->url."?".http_build_query($data));
+        }
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch);
+
+        if (!curl_errno($ch)) {
             if ($this->debug) {
-                $this->storeRequestResults($r->status_code, $data);
-                if ($r->status_code != 200) {
-                    return "Sync POST Request Failed: ".$r->status_code;
+                $info = curl_getinfo($ch);
+                $this->storeRequestResults($info['http_code'], $data);
+                if ($info['http_code'] != 200) {
+                    $res_.= "Sync ".$type." Request Failed: ".$info['http_code'];
                 }
             }
-            return true;
         }
-        catch (Exception $e) {
+        else {
             if ($this->debug) {
                 $this->storeRequestResults(404, $data);
             }
-            return "Sync POST Request Failed: ".$e;
+            $res_.="Sync ".$type." Request Failed: ".curl_error($ch);
         }
+        // Close handle
+        curl_close($ch);
+
+        // If request failed return error string, else return true
+        if ($res_ != "") {
+            $res = $res_;
+        }
+        return $res;
     }
 
     /**
