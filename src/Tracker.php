@@ -279,7 +279,7 @@ class Tracker extends Constants {
      */
     public function trackEcommerceTransaction($order_id, $total_value, $currency = NULL, $affiliation = NULL,
                                               $tax_value = NULL, $shipping = NULL, $city = NULL, $state = NULL,
-                                              $country = NULL, $items, $context = NULL, $timestamp_in_ms = NULL) {
+                                              $country = NULL, $items = array(), $context = NULL, $timestamp_in_ms = NULL) {
         $ep = new Payload($timestamp_in_ms);
         $ep->add("e", "tr");
         $ep->add("tr_id", $order_id);
