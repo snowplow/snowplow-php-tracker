@@ -137,4 +137,11 @@ class SubjectTest extends TestCase {
         $this->assertArrayHasKey("sid", $settings);
         $this->assertEquals("759e1c9a-6b74-403c-8b6f-18eb9f0c2f02", $settings["sid"]);
     }
+
+    public function testAddSessionIndex() {
+        $this->subject->setSessionIndex(1);
+        $settings = $this->getTrackerSettings();
+        $this->assertArrayHasKey("vid", $settings);
+        $this->assertEquals(1, $settings["vid"]);
+    }
 }
