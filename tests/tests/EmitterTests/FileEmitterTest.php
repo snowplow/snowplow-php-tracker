@@ -121,4 +121,11 @@ class FileEmitterTest extends TestCase {
         $this->assertEquals($root_dir."/temp/w1/",
             $paths[1]);
     }
+
+    public function testLogDirOverridden() {
+        $log_dir = "/tmp/snowplow/";
+        $emitter = new FileEmitter($this->uri, false, "POST", 3, 3, 100, false, $log_dir);
+
+        $this->assertEquals($log_dir, $emitter->returnLogDir());
+    }
 }
