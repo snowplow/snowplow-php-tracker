@@ -211,9 +211,10 @@ class CurlEmitter extends Emitter {
      *
      * @param string $payload - Data included in request
      * @param string $type - Type of request to be made
+     * @param int    $timeout - Maximum time the request should take, in seconds
      * @return resource
      */
-    private function getCurlRequest($payload, $type) {
+    private function getCurlRequest($payload, $type, $timeout = 1) {
         $ch = curl_init($this->url);
         if ($type == "POST") {
             $header = array(
@@ -229,6 +230,7 @@ class CurlEmitter extends Emitter {
             curl_setopt($ch, CURLOPT_URL, $this->url."?".$payload);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
         return $ch;
     }
 
