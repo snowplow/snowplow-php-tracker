@@ -49,8 +49,9 @@ class FileEmitter extends Emitter {
      * @param int|float|null $timeout
      * @param int|null $buffer_size
      * @param bool|null $debug
+     * @param string|null $log_dir
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false, $log_dir = NULL) {
 
         // Set error handler to catch warnings
         $this->warning_handler();
@@ -60,7 +61,7 @@ class FileEmitter extends Emitter {
 
         $this->type     = $this->getRequestType($type);
         $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
-        $this->log_dir  = $this->worker_root.self::WORKER_FOLDER;
+        $this->log_dir  = $log_dir ?: $this->worker_root.self::WORKER_FOLDER;
 
         // Initilize the event log file
         $this->log_file = $this->initLogFile();
