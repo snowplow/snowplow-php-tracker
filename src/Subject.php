@@ -149,6 +149,24 @@ class Subject extends Constants {
     }
 
     /**
+     * Sets the Session ID
+     *
+     * @param string $sessionId
+     */
+    public function setSessionId($sessionId) {
+        $this->tracker_settings["sid"] = $sessionId;
+    }
+
+    /**
+     * Sets the Session Index
+     *
+     * @param int $sessionIndex
+     */
+    public function setSessionIndex($sessionIndex) {
+        $this->tracker_settings["vid"] = $sessionIndex;
+    }
+
+    /**
      * Sets the referer
      *
      * @param string $refr
