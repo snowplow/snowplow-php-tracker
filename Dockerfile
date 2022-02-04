@@ -1,6 +1,6 @@
-FROM php:7.2
+FROM --platform=linux/amd64 php:7.4
 
-RUN pecl install xdebug-2.7.2 \
+RUN pecl install xdebug-3.1.3 \
     && docker-php-ext-enable xdebug
 
 RUN apt-get update \
