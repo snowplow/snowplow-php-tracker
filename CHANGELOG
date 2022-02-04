@@ -1,3 +1,12 @@
+Version 0.5.0 (2022-02-04)
+--------------------------
+Make testTrackerInit version use TRACKER_VERSION (#110)
+Install composer programmatically (#108)
+Add PHP 7.4 and 8.1 to CI build (#107)
+Fix build on ARM (#102)
+Add a setter for session ID on a subject (#105) (Thanks to @TijmenWierenga)
+Allow log dir to be overridden for FileEmitter (#106) (Thanks to @EricTendian)
+
 Version 0.4.0 (2021-03-02)
 --------------------------
 Required parameters after optional parameters deprecated in PHP 8.0 (closes #97)
