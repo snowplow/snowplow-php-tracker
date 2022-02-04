@@ -24,6 +24,7 @@ use Snowplow\Tracker\Tracker;
 use Snowplow\Tracker\Emitters\SyncEmitter;
 use Snowplow\Tracker\Subject;
 use PHPUnit\Framework\TestCase;
+use Snowplow\Tracker\Constants;
 
 /**
  * Tests the basic use-cases of the Tracker
@@ -67,7 +68,7 @@ class TrackerTest extends TestCase {
         // Asserts
         $this->assertEquals($this->s1, $tracker->returnSubject());
         $this->assertEquals(false, $tracker->returnEncodeBase64());
-        $this->assertEquals(array("tv" => "php-0.4.0", "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
+        $this->assertEquals(array("tv" => Constants::TRACKER_VERSION, "tna" => "namespace", "aid" => "app_id"), $tracker->returnStdNvPairs());
         $tracker->turnOffDebug(true);
     }
 
