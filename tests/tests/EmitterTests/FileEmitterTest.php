@@ -2,7 +2,7 @@
 /*
     FileEmitterTest.php
 
-    Copyright (c) 2014-2021 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2022 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,6 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -120,5 +119,12 @@ class FileEmitterTest extends TestCase {
             $paths[0]);
         $this->assertEquals($root_dir."/temp/w1/",
             $paths[1]);
+    }
+
+    public function testLogDirOverridden() {
+        $log_dir = "/tmp/snowplow/";
+        $emitter = new FileEmitter($this->uri, false, "POST", 3, 3, 100, false, $log_dir);
+
+        $this->assertEquals($log_dir, $emitter->returnLogDir());
     }
 }

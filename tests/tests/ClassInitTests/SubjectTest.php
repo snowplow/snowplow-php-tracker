@@ -2,7 +2,7 @@
 /*
     SubjectTest.php
 
-    Copyright (c) 2014-2021 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2022 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,6 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -129,5 +128,19 @@ class SubjectTest extends TestCase {
         $settings = $this->getTrackerSettings();
         $this->assertArrayHasKey("tnuid", $settings);
         $this->assertEquals("tnuid", $settings["tnuid"]);
+    }
+
+    public function testAddSessionId() {
+        $this->subject->setSessionId("759e1c9a-6b74-403c-8b6f-18eb9f0c2f02");
+        $settings = $this->getTrackerSettings();
+        $this->assertArrayHasKey("sid", $settings);
+        $this->assertEquals("759e1c9a-6b74-403c-8b6f-18eb9f0c2f02", $settings["sid"]);
+    }
+
+    public function testAddSessionIndex() {
+        $this->subject->setSessionIndex(1);
+        $settings = $this->getTrackerSettings();
+        $this->assertArrayHasKey("vid", $settings);
+        $this->assertEquals(1, $settings["vid"]);
     }
 }

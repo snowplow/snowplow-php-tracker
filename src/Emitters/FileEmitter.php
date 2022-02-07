@@ -2,7 +2,7 @@
 /*
     FileEmitter.php
 
-    Copyright (c) 2014-2021 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2022 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -16,7 +16,6 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -49,8 +48,9 @@ class FileEmitter extends Emitter {
      * @param int|float|null $timeout
      * @param int|null $buffer_size
      * @param bool|null $debug
+     * @param string|null $log_dir
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $workers = NULL, $timeout = NULL, $buffer_size = NULL, $debug = false, $log_dir = NULL) {
 
         // Set error handler to catch warnings
         $this->warning_handler();
@@ -60,7 +60,7 @@ class FileEmitter extends Emitter {
 
         $this->type     = $this->getRequestType($type);
         $this->url      = $this->getCollectorUrl($this->type, $uri, $protocol);
-        $this->log_dir  = $this->worker_root.self::WORKER_FOLDER;
+        $this->log_dir  = $log_dir ?: $this->worker_root.self::WORKER_FOLDER;
 
         // Initilize the event log file
         $this->log_file = $this->initLogFile();

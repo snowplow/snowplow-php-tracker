@@ -3,7 +3,7 @@
 /*
     Subject.php
 
-    Copyright (c) 2014-2021 Snowplow Analytics Ltd. All rights reserved.
+    Copyright (c) 2014-2022 Snowplow Analytics Ltd. All rights reserved.
 
     This program is licensed to you under the Apache License Version 2.0,
     and you may not use this file except in compliance with the Apache License
@@ -17,7 +17,6 @@
     language governing permissions and limitations there under.
 
     Authors: Joshua Beemster
-    Copyright: Copyright (c) 2014-2021 Snowplow Analytics Ltd
     License: Apache License Version 2.0
 */
 
@@ -146,6 +145,24 @@ class Subject extends Constants {
      */
     public function setDomainUserId($domainUserId) {
         $this->tracker_settings["duid"] = $domainUserId;
+    }
+
+    /**
+     * Sets the Session ID
+     *
+     * @param string $sessionId
+     */
+    public function setSessionId($sessionId) {
+        $this->tracker_settings["sid"] = $sessionId;
+    }
+
+    /**
+     * Sets the Session Index
+     *
+     * @param int $sessionIndex
+     */
+    public function setSessionIndex($sessionIndex) {
+        $this->tracker_settings["vid"] = $sessionIndex;
     }
 
     /**
