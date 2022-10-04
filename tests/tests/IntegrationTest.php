@@ -69,14 +69,14 @@ class IntegrationTest extends TestCase {
 
     private function getContext() {
         return array(
-            "schema" => "iglu:com.acme_company/context_example/jsonschema/2.1.1",
+            "schema" => "iglu:com.acme_company/context_example/jsonschema/2-1-1",
             "data" => array("movie_name" => "Solaris", "poster_country" => "JP", "poster_year" => 1978)
         );
     }
 
     private function getUnstructEvent() {
         return array(
-            "schema" => "com.example_company/save-game/jsonschema/1.0.2",
+            "schema" => "com.example_company/save-game/jsonschema/1-0-2",
             "data" => array("save_id" => "4321", "level" => 23, "difficultyLevel" => "HARD", "dl_content" => True)
         );
     }
