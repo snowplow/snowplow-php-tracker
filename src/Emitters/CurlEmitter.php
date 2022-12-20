@@ -35,21 +35,24 @@ class CurlEmitter extends Emitter {
     private $curl_buffer = array();
     private $curl_limit;
     private $rolling_window;
+    private $curl_timeout;
 
     /**
      * Constructs an async curl emitter.
      *
-     * @param string $uri
-     * @param string|null $protocol
-     * @param string|null $type
-     * @param int|null $buffer_size
-     * @param bool $debug
+     * @param string $uri - Collector URI
+     * @param string|null $protocol - What protocol we are using for the collector
+     * @param string|null $type - The type of request we will be making to the collector
+     * @param int|null $buffer_size - Emitter buffer size
+     * @param bool $debug - Debug mode
+     * @param int|null $curl_timeout - Maximum time the request is allowed to take, in seconds
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $curl_timeout = NULL) {
         $this->type           = $this->getRequestType($type);
         $this->url            = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
         $this->rolling_window = $this->type == "POST" ? self::CURL_WINDOW_POST : self::CURL_WINDOW_GET;
+        $this->curl_timeout   = $curl_timeout;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -211,10 +214,9 @@ class CurlEmitter extends Emitter {
      *
      * @param string $payload - Data included in request
      * @param string $type - Type of request to be made
-     * @param int    $timeout - Maximum time the request should take, in seconds
      * @return resource
      */
-    private function getCurlRequest($payload, $type, $timeout = 1) {
+    private function getCurlRequest($payload, $type) {
         $ch = curl_init($this->url);
         if ($type == "POST") {
             $header = array(
@@ -230,7 +232,9 @@ class CurlEmitter extends Emitter {
             curl_setopt($ch, CURLOPT_URL, $this->url."?".$payload);
         }
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        if ($this->curl_timeout != NULL) {
+            curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);
+        }
         return $ch;
     }
 
