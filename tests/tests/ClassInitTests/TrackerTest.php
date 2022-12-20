@@ -127,7 +127,7 @@ class TrackerTest extends TestCase {
             ->method('addEvent')
             ->with($this->callback(function ($a) use($test) {
                 $test->assertArrayHasKey('eid', $a);
-                $test->assertRegExp('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $a['eid']);
+                $test->assertMatchesRegularExpression('/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/', $a['eid']);
 
                 return true;
             }));

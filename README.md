@@ -27,9 +27,9 @@ Make sure `docker` & `docker-compose` are installed.
 
 ## Find out more
 
-| **[Technical Docs][techdocs]** | **[Setup Guide][setup]** | **[Contributing][contributing]** |
-|:------------------------------:|:------------------------:|:--------------------------------:|
-| ![i1][techdocs-image]          | ![i2][setup-image]       | ![i3][contributing-image]        |
+| **[Technical Docs][techdocs]** | **[Contributing][contributing]** |
+|:------------------------------:|:--------------------------------:|
+| ![i1][techdocs-image]          | ![i3][contributing-image]        |
 
 ## Copyright and license
 
@@ -44,7 +44,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-[1]: https://snowplowanalytics.com/
+[1]: https://snowplow.io/
 [2]: https://php.net/
 
 [gh-actions]: https://github.com/snowplow/snowplow-php-tracker/actions
@@ -64,9 +64,8 @@ limitations under the License.
 [techdocs-image]: https://d3i6fms1cm1j0i.cloudfront.net/github/images/techdocs.png
 [setup-image]: https://d3i6fms1cm1j0i.cloudfront.net/github/images/setup.png
 [contributing-image]: https://d3i6fms1cm1j0i.cloudfront.net/github/images/contributing.png
-[techdocs]: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/php-tracker/
-[setup]: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/php-tracker/setup/
+[techdocs]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/php-tracker/
 [contributing]: https://github.com/snowplow/snowplow-php-tracker/blob/master/CONTRIBUTING.md
 
-[tracker-classificiation]: https://docs.snowplowanalytics.com/docs/collecting-data/collecting-from-own-applications/tracker-maintenance-classification/
+[tracker-classificiation]: https://docs.snowplow.io/docs/collecting-data/collecting-from-own-applications/tracker-maintenance-classification/
 [early-release]: https://img.shields.io/static/v1?style=flat&label=Snowplow&message=Early%20Release&color=014477&labelColor=9ba0aa&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAeFBMVEVMaXGXANeYANeXANZbAJmXANeUANSQAM+XANeMAMpaAJhZAJeZANiXANaXANaOAM2WANVnAKWXANZ9ALtmAKVaAJmXANZaAJlXAJZdAJxaAJlZAJdbAJlbAJmQAM+UANKZANhhAJ+EAL+BAL9oAKZnAKVjAKF1ALNBd8J1AAAAKHRSTlMAa1hWXyteBTQJIEwRgUh2JjJon21wcBgNfmc+JlOBQjwezWF2l5dXzkW3/wAAAHpJREFUeNokhQOCA1EAxTL85hi7dXv/E5YPCYBq5DeN4pcqV1XbtW/xTVMIMAZE0cBHEaZhBmIQwCFofeprPUHqjmD/+7peztd62dWQRkvrQayXkn01f/gWp2CrxfjY7rcZ5V7DEMDQgmEozFpZqLUYDsNwOqbnMLwPAJEwCopZxKttAAAAAElFTkSuQmCC

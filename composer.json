@@ -1,34 +1,34 @@
 {
-    "name": "snowplow/snowplow-tracker",
-    "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
-    "type": "library",
-    "license": "Apache-2.0",
-    "keywords": [
-        "snowplow",
-        "analytics",
-        "event analytics"
-    ],
-    "homepage": "http://snowplowanalytics.com/",
-    "support": {
-        "email": "support@snowplowanalytics.com"
-    },
-    "require": {
-        "php": ">=7.4",
-        "ramsey/uuid": "^3 || ^4"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.5.13",
-        "php-coveralls/php-coveralls": "^2.5.2",
-        "phpunit/php-token-stream": "^4.0.4"
-    },
-    "autoload": {
-        "psr-4": {
-            "Snowplow\\Tracker\\": "src"
-        }
-    },
-    "authors": [
-        {
-            "name": "Snowplow Analytics Ltd"
-        }
-    ]
+  "name": "snowplow/snowplow-tracker",
+  "description": "Snowplow event tracker for PHP. Add analytics into your PHP apps and scripts",
+  "type": "library",
+  "license": "Apache-2.0",
+  "keywords": [
+    "snowplow",
+    "analytics",
+    "event analytics"
+  ],
+  "homepage": "https://snowplow.io/",
+  "support": {
+    "email": "support@snowplow.io"
+  },
+  "require": {
+    "php": ">=7.4",
+    "ramsey/uuid": "^3 || ^4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.5.13",
+    "php-coveralls/php-coveralls": "^2.5.2",
+    "phpunit/php-token-stream": "^4.0.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Snowplow\\Tracker\\": "src"
+    }
+  },
+  "authors": [
+    {
+      "name": "Snowplow Analytics Ltd"
+    }
+  ]
 }
