@@ -31,6 +31,8 @@ class SocketEmitter extends Emitter {
     private $ssl;
     private $type;
     private $timeout;
+    private $debug;
+    private $requests_results;
 
     // Socket Parameters
 
