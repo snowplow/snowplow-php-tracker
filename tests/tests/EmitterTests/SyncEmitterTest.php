@@ -55,7 +55,7 @@ class SyncEmitterTest extends TestCase {
     // Tests
 
     public function testSyncPostBadUri() {
-        $tracker = $this->returnTracker("POST", true, "collector.acme.au");
+        $tracker = $this->returnTracker("POST", true, "snowplow-unregistered-url.this-should-fail.io");
         $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
@@ -68,7 +68,7 @@ class SyncEmitterTest extends TestCase {
     }
 
     public function testSyncGetBadUri() {
-        $tracker = $this->returnTracker("GET", true, "collector.acme.au");
+        $tracker = $this->returnTracker("GET", true, "snowplow-unregistered-url.this-should-fail.io");
         $tracker->flushEmitters();
         for ($i = 0; $i < 1; $i++) {
             $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
