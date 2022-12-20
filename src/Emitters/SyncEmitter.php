@@ -31,6 +31,7 @@ class SyncEmitter extends Emitter {
     private $type;
     private $url;
     private $debug;
+    private $requests_results;
 
     /**
      * Creates a Synchronous Emitter

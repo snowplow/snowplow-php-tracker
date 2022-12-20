@@ -28,6 +28,9 @@ class CurlEmitter extends Emitter {
 
     private $type;
     private $url;
+    private $debug;
+    private $requests_results;
+    private $debug_payloads;
 
     // Curl Specific Parameters
 
