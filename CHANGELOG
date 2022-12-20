@@ -1,3 +1,10 @@
+Version 0.6.0 (2022-12-20)
+--------------------------
+Bump dependencies (#131)
+Add configurable timeout in CurlEmitter (#127) (Thanks to @dbhynds and @EricTendian)
+Prevent deprecation warning for dynamic property creation under PHP 8.2 (#123) (Thanks to @ldebrouwer)
+Fix failing emitter tests (#125)
+
 Version 0.5.0 (2022-02-04)
 --------------------------
 Make testTrackerInit version use TRACKER_VERSION (#110)
