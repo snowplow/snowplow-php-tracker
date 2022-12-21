@@ -303,6 +303,7 @@ function execute($curls, $rolling_window) {
     }
 
     // Execute the rolling curl
+    $running = 0;
     do {
         $execrun = curl_multi_exec($master, $running);
         while ($execrun == CURLM_CALL_MULTI_PERFORM);
