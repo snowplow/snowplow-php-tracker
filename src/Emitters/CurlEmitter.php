@@ -173,6 +173,7 @@ class CurlEmitter extends Emitter {
         }
 
         // Execute the rolling curl
+        $running = 0;
         do {
             do {
                 $execrun = curl_multi_exec($master, $running);
