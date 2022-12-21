@@ -1,3 +1,7 @@
+Version 0.6.1 (2022-12-21)
+--------------------------
+Fix curl_multi_exec deprecated functionality error (#121)
+
 Version 0.6.0 (2022-12-20)
 --------------------------
 Bump dependencies (#131)
