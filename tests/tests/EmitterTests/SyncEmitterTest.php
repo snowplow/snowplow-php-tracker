@@ -42,14 +42,14 @@ class SyncEmitterTest extends TestCase {
         }
     }
 
-    private function returnTracker($type, $debug, $uri) {
+    private function returnTracker($type, $debug, $uri, $max_retries = 1) {
         $subject = new Subject();
-        $e1 = $this->returnSyncEmitter($type, $uri, $debug);
+        $e1 = $this->returnSyncEmitter($type, $uri, $debug, 10, $max_retries);
         return new Tracker($e1, $subject, NULL, NULL, true);
     }
 
-    private function returnSyncEmitter($type, $uri, $debug, $buffer = 10) {
-        return new SyncEmitter($uri, "http", $type, $buffer, $debug);
+    private function returnSyncEmitter($type, $uri, $debug, $buffer = 10, $max_retries = 1) {
+        return new SyncEmitter($uri, "http", $type, $buffer, $debug, $max_retries);
     }
 
     // Tests
@@ -135,5 +135,47 @@ class SyncEmitterTest extends TestCase {
         //Asserts
         $this->assertEquals(50, $e1->returnBufferSize());
         $this->assertEquals(50, $e2->returnBufferSize());
+    }
+
+    public function testRetriesWith500ResponseCode() {
+        $tracker = $this->returnTracker("GET", true, $this->uri."/fail_500");
+        $tracker->flushEmitters();
+        for ($i = 0; $i < 1; $i++) {
+            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        }
+        $tracker->flushEmitters();
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 500);
+        $this->assertEquals(2, count($tracker->returnEmitters()[0]->returnRequestResults()));
+        $tracker->turnOffDebug(true);
+    }
+
+    public function testRetriesTwiceWith500ResponseCode() {
+        $tracker = $this->returnTracker("GET", true, $this->uri."/fail_500", 2);
+        $tracker->flushEmitters();
+        for ($i = 0; $i < 1; $i++) {
+            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        }
+        $tracker->flushEmitters();
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 500);
+        $this->assertEquals(3, count($tracker->returnEmitters()[0]->returnRequestResults()));
+        $tracker->turnOffDebug(true);
+    }
+
+    public function testDoesntRetryWith400ResponseCode() {
+        $tracker = $this->returnTracker("GET", true, $this->uri."/fail_400");
+        $tracker->flushEmitters();
+        for ($i = 0; $i < 1; $i++) {
+            $tracker->trackPageView("www.example.com", "example", "www.referrer.com");
+        }
+        $tracker->flushEmitters();
+
+        //Asserts
+        $this->requestResultAssert($tracker->returnEmitters(), 400);
+        $this->assertEquals(1, count($tracker->returnEmitters()[0]->returnRequestResults()));
+        $tracker->turnOffDebug(true);
     }
 }

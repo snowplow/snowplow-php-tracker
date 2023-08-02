@@ -21,6 +21,7 @@
 
 namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
+use Snowplow\Tracker\Emitters\RetryRequestManager;
 use Exception;
 
 class SocketEmitter extends Emitter {
@@ -33,6 +34,8 @@ class SocketEmitter extends Emitter {
     private $timeout;
     private $debug;
     private $requests_results;
+    private $max_retry_attempts;
+    private $retry_backoff_ms;
 
     // Socket Parameters
 
@@ -42,18 +45,22 @@ class SocketEmitter extends Emitter {
     /**
      * Creates a Socket Emitter
      *
-     * @param string $uri
-     * @param bool|null $ssl
-     * @param string|null $type
-     * @param float|int|null $timeout
-     * @param int|null $buffer_size
-     * @param bool|null $debug
+     * @param string $uri - Collector URI to be used for the request
+     * @param bool|null $ssl - If the collector is using SSL
+     * @param string|null $type - Type of request to be made (POST || GET)
+     * @param float|int|null $timeout - Timeout for the socket connection
+     * @param int|null $buffer_size - Number of events to buffer before making a request to collector
+     * @param bool|null $debug - If debug is on
+     * @param int|null $max_retry_attempts - The maximum number of times to retry a request
+     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request
      */
-    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL) {
+    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
         $this->type    = $this->getRequestType($type);
         $this->uri     = $uri;
         $this->ssl     = $ssl == NULL ? self::DEFAULT_SSL : (bool) $ssl;
         $this->timeout = $timeout == NULL ? self::SOCKET_TIMEOUT : $timeout;
+        $this->max_retry_attempts = $max_retry_attempts;
+        $this->retry_backoff_ms = $retry_backoff_ms;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -126,11 +133,15 @@ class SocketEmitter extends Emitter {
      * @param bool $retry - If we want to allow the function to make a second attempt.
      * @return bool - Returns if write was successful.
      */
-    private function makeRequest($data, $retry = true) {
+    private function makeRequest($data, $retry_request_manager = NULL) {
         $bytes_written = 0;
         $bytes_total = strlen($data);
         $closed = false;
         $res_ = "";
+
+        if ($retry_request_manager == NULL) {
+            $retry_request_manager = new RetryRequestManager($this->max_retry_attempts, $this->retry_backoff_ms);
+        }
 
         // Try to send data while bytes still have to be written to the socket
         while (!$closed && $bytes_written < $bytes_total) {
@@ -141,7 +152,7 @@ class SocketEmitter extends Emitter {
                 $res_.= "Error: fwrite exception - ".$e."\n";
                 $closed = true;
             }
-            if (!isset($written) || !$written) {
+            if (!isset($written) || $written === false) {
                 $closed = true;
             }
             else {
@@ -149,29 +160,40 @@ class SocketEmitter extends Emitter {
             }
         }
 
-        // If the socket could not be written attempt again
-        if ($closed) {
-            fclose($this->socket);
-            if ($retry) {
-                $socket_made = $this->makeSocket();
-                if (is_bool($socket_made) && $socket_made) {
-                    return $this->makeRequest($data, false);
-                }
-                else {
-                    return "Error: Socket could not be created\n".$socket_made."\n".$res_;
-                }
-            }
-            else {
-                return "Error: socket cannot be written after retry\n".$res_;
-            }
-        }
+        // Get response for request
+        $status_code = 0;
 
-        // If debug is on store the request result
-        if ($this->debug) {
-            $this->storeRequestResults(fread($this->socket, 1024), $data);
+        if (!$closed) {
+            $res = fread($this->socket, 2048);
+            $status_code = $this->parseStatusCode($res);
+
+            // If debug is on store the request result
+            if ($this->debug) {
+                $this->storeRequestResults($res, $data);
+            }
         }
 
         fclose($this->socket);
+
+        // If the socket could not be written attempt again
+        if (($closed && $retry_request_manager->shouldRetryFailedRequest()) ||
+            $retry_request_manager->shouldRetryForStatusCode($status_code)) {
+            $retry_request_manager->incrementRetryCount();
+            $retry_request_manager->backoff();
+
+            $socket_made = $this->makeSocket();
+            if (is_bool($socket_made) && $socket_made) {
+                return $this->makeRequest($data, $retry_request_manager);
+            }
+            else {
+                return "Error: Socket could not be created\n".$socket_made."\n".$res_;
+            }
+        } else if ($closed) {
+            return "Error: socket cannot be written after retry\n".$res_;
+        } else if (!$retry_request_manager->isGoodStatusCode($status_code)) {
+            return "Error: collector responded with status code ".$status_code.", won't retry";
+        }
+
         return true;
     }
 
@@ -329,6 +351,12 @@ class SocketEmitter extends Emitter {
      */
     public function returnRequestResults() {
         return $this->requests_results;
+    }
+
+    private function parseStatusCode($res) {
+        $contents = explode("\n", $res);
+        $status = explode(" ", $contents[0], 3);
+        return $status[1];
     }
 
     /**

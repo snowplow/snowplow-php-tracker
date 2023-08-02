@@ -1,7 +1,42 @@
 {
   "port": 4545,
   "protocol": "http",
-  "stubs": [{
+  "stubs": [
+    {
+      "responses": [{ 
+        "is": {
+          "statusCode": 500,
+          "body": "Failed Snowplow Request"
+        }
+      }],
+      "predicates": [
+        {
+          "contains": {
+            "path": "/fail_500/i",
+            "method": "GET",
+            "body": ""
+          }
+        }
+      ]
+    },
+    {
+      "responses": [{ 
+        "is": {
+          "statusCode": 400,
+          "body": "Failed Snowplow Request"
+        }
+      }],
+      "predicates": [
+        {
+          "contains": {
+            "path": "/fail_400/i",
+            "method": "GET",
+            "body": ""
+          }
+        }
+      ]
+    },
+    {
       "responses": [
         {
           "is": {
