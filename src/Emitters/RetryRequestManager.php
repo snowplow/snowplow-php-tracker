@@ -24,14 +24,14 @@ namespace Snowplow\Tracker\Emitters;
 class RetryRequestManager {
     /// The number of times the current request has been retried
     private int $retry_count = 0;
-    /// The maximum number of times to retry a request
+    /// The maximum number of times to retry a request. Defaults to 1.
     private int $max_retry_attempts;
-    /// The number of milliseconds to backoff before retrying a request
+    /// The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
     private int $backoff_ms;
 
     public function __construct(int $max_retry_attempts = NULL, int $backoff_ms = NULL) {
         $this->max_retry_attempts = $max_retry_attempts == NULL ? 1 : $max_retry_attempts;
-        $this->backoff_ms = $backoff_ms == NULL ? 10 : $backoff_ms;
+        $this->backoff_ms = $backoff_ms == NULL ? 100 : $backoff_ms;
     }
 
     public function incrementRetryCount(): void {
@@ -61,8 +61,12 @@ class RetryRequestManager {
         return $status_code >= 200 && $status_code < 300;
     }
 
+    public function getBackoffDelayMs(): int {
+        return $this->backoff_ms * pow(2, $this->retry_count - 1);
+    }
+
     public function backoff(): void {
-        usleep(pow($this->backoff_ms, $this->retry_count) * 1000);
+        usleep($this->getBackoffDelayMs() * 1000);
     }
 }
 

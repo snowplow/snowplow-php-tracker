@@ -49,10 +49,10 @@ class SocketEmitter extends Emitter {
      * @param bool|null $ssl - If the collector is using SSL
      * @param string|null $type - Type of request to be made (POST || GET)
      * @param float|int|null $timeout - Timeout for the socket connection
-     * @param int|null $buffer_size - Number of events to buffer before making a request to collector
+     * @param int|null $buffer_size - Number of events to buffer before making a POST request to collector
      * @param bool|null $debug - If debug is on
-     * @param int|null $max_retry_attempts - The maximum number of times to retry a request
-     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request
+     * @param int|null $max_retry_attempts - The maximum number of times to retry a request. Defaults to 1.
+     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
      */
     public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
         $this->type    = $this->getRequestType($type);
@@ -160,7 +160,6 @@ class SocketEmitter extends Emitter {
             }
         }
 
-        // Get response for request
         $status_code = 0;
 
         if (!$closed) {

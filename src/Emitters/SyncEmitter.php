@@ -44,8 +44,8 @@ class SyncEmitter extends Emitter {
      * @param string|null $type - Type of request to be made (POST || GET)
      * @param int|null $buffer_size - Number of events to buffer before making a POST request to collector
      * @param bool|null $debug - If debug is on
-     * @param int|null $max_retry_attempts - The maximum number of times to retry a request
-     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request
+     * @param int|null $max_retry_attempts - The maximum number of times to retry a request. Defaults to 1.
+     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
      */
     public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
         $this->type = $this->getRequestType($type);
