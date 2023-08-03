@@ -18,10 +18,12 @@
 
 namespace Snowplow\Tracker\Emitters;
 
+use Snowplow\Tracker\Constants;
+
 /**
  * Manages the state for retrying failed requests in emitters.
  */
-class RetryRequestManager {
+class RetryRequestManager extends Constants {
     /// The number of times the current request has been retried
     private int $retry_count = 0;
     /// The maximum number of times to retry a request. Defaults to 1.
@@ -53,8 +55,7 @@ class RetryRequestManager {
         }
 
         // don't retry certain 4xx codes, retry everything else
-        $dont_retry_codes = array(400, 401, 403, 410, 422);
-        return !in_array($status_code, $dont_retry_codes);
+        return !in_array($status_code, self::NO_RETRY_STATUS_CODES);
     }
 
     public function isGoodStatusCode(int $status_code): bool {
