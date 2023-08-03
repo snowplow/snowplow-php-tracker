@@ -21,6 +21,7 @@
 
 namespace Snowplow\Tracker\Emitters;
 use Snowplow\Tracker\Emitter;
+use Snowplow\Tracker\Emitters\RetryRequestManager;
 use Requests;
 use Exception;
 
@@ -32,19 +33,25 @@ class SyncEmitter extends Emitter {
     private $url;
     private $debug;
     private $requests_results;
+    private $max_retry_attempts;
+    private $retry_backoff_ms;
 
     /**
      * Creates a Synchronous Emitter
      *
-     * @param string $uri
-     * @param string|null $protocol
-     * @param string|null $type
-     * @param int|null $buffer_size
-     * @param bool $debug
+     * @param string $uri - Collector URI to be used for the request
+     * @param string|null $protocol - Protocol to be used for the request (http || https)
+     * @param string|null $type - Type of request to be made (POST || GET)
+     * @param int|null $buffer_size - Number of events to buffer before making a POST request to collector
+     * @param bool|null $debug - If debug is on
+     * @param int|null $max_retry_attempts - The maximum number of times to retry a request. Defaults to 1.
+     * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
         $this->type = $this->getRequestType($type);
         $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
+        $this->max_retry_attempts = $max_retry_attempts;
+        $this->retry_backoff_ms = $retry_backoff_ms;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -98,9 +105,13 @@ class SyncEmitter extends Emitter {
      * @param string $type - The type of the Request
      * @return bool|string - Return true if successful request or an error string
      */
-    private function curlRequest($data, $type) {
+    private function curlRequest($data, $type, $retry_request_manager = NULL) {
         $res = true;
         $res_ = "";
+
+        if ($retry_request_manager == NULL) {
+            $retry_request_manager = new RetryRequestManager($this->max_retry_attempts, $this->retry_backoff_ms);
+        }
 
         // Create a cURL handle, set transfer options and execute
         $ch = curl_init($this->url);
@@ -121,12 +132,15 @@ class SyncEmitter extends Emitter {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
 
+        $status_code = 0;
+
         if (!curl_errno($ch)) {
+            $info = curl_getinfo($ch);
+            $status_code = $info['http_code'];
             if ($this->debug) {
-                $info = curl_getinfo($ch);
-                $this->storeRequestResults($info['http_code'], $data);
+                $this->storeRequestResults($status_code, $data);
                 if ($info['http_code'] != 200) {
-                    $res_.= "Sync ".$type." Request Failed: ".$info['http_code'];
+                    $res_.= "Sync ".$type." Request Failed: ".$status_code;
                 }
             }
         }
@@ -138,6 +152,14 @@ class SyncEmitter extends Emitter {
         }
         // Close handle
         curl_close($ch);
+
+        // Retry request if necessary
+        if ($retry_request_manager->shouldRetryForStatusCode($status_code)) {
+            $retry_request_manager->incrementRetryCount();
+            $retry_request_manager->backoff();
+
+            return $this->curlRequest($data, $type, $retry_request_manager);
+        }
 
         // If request failed return error string, else return true
         if ($res_ != "") {
