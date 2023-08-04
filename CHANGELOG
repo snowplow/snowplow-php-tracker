@@ -1,3 +1,7 @@
+Version 0.7.0 (2023-08-03)
+--------------------------
+Add retry capability for events that failed to send to collector in socket and sync emitter (#135)
+
 Version 0.6.1 (2022-12-21)
 --------------------------
 Fix curl_multi_exec deprecated functionality error (#121)
