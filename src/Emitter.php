@@ -60,7 +60,7 @@ class Emitter extends Constants {
             if (self::DEBUG_LOG_FILES) {
                 if ($this->initDebug($type) !== true) {
                     $this->write_perms = false;
-                    print_r("Unable to create debug log files: invalid write permissions.");
+                    print_r("Unable to create debug log files: invalid write permissions for ".$this->debug_file);
                 }
             }
         }
