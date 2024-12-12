@@ -1,3 +1,7 @@
+Version 0.8.0 (2024-12-12)
+--------------------------
+Add setCurlAmount and setRollingWindow setters to CurlEmitter
+
 Version 0.7.1 (2024-05-15)
 --------------------------
 Log the file name in errors from emitter (#143) thanks to @kaurov
