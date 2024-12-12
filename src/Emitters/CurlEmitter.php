@@ -304,7 +304,16 @@ class CurlEmitter extends Emitter {
     }
 
     /**
-     * Returns the amount of curls we need before sending
+     * Set the amount of times we need to reach the buffer limit (buffer_size) before we initiate sending
+     * 
+     * @param int $curl_limit
+     */
+    public function setCurlAmount($curl_limit) {
+        $this->curl_limit = $curl_limit;
+    }
+
+    /**
+     * Returns the amount of times we need to reach the buffer limit (buffer_size) before we initiate sending
      *
      * @return int
      */
@@ -313,7 +322,16 @@ class CurlEmitter extends Emitter {
     }
 
     /**
-     * Returns the amount of simultaneous curls we send
+     * Set the max amount of concurrent curl requests being made
+     * 
+     * @param int $rolling_window
+     */
+    public function setRollingWindow($rolling_window) {
+        $this->rolling_window = $rolling_window;
+    }
+
+    /**
+     * Returns the max amount of concurrent curl requests being made
      *
      * @return int
      */
