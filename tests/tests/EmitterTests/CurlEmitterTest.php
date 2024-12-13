@@ -140,4 +140,22 @@ class CurlEmitterTest extends TestCase {
         $this->assertEquals(10,
             $emitter->returnRollingWindow());
     }
+
+    public function testSetRollingWindow() {
+        $tracker = $this->returnTracker("POST", false, $this->uri);
+        $emitters = $tracker->returnEmitters();
+        $emitter = $emitters[0];
+
+        $emitter->setRollingWindow(32);
+        $this->assertEquals(32, $emitter->returnRollingWindow());
+    }
+
+    public function testSetCurlAmount() {
+        $tracker = $this->returnTracker("POST", false, $this->uri);
+        $emitters = $tracker->returnEmitters();
+        $emitter = $emitters[0];
+
+        $emitter->setCurlAmount(12);
+        $this->assertEquals(12, $emitter->returnCurlAmount());
+    }
 }
