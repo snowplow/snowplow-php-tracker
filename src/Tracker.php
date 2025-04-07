@@ -23,6 +23,7 @@
 namespace Snowplow\Tracker;
 
 use Ramsey\Uuid\Uuid;
+use Snowplow\Tracker\Emitter;
 
 class Tracker extends Constants {
 
@@ -36,7 +37,7 @@ class Tracker extends Constants {
     /**
      * Constructs a new tracker object with emitter(s) and a subject.
      *
-     * @param emitter|array $emitter - Emitter object, used for sending event payloads to for processing
+     * @param Emitter|array $emitter - Emitter object, used for sending event payloads to for processing
      * @param subject $subject - Subject object, contains extra information which is parcelled with the event
      * @param string|null $namespace
      * @param string|null $app_id
