@@ -36,6 +36,7 @@ class SocketEmitter extends Emitter {
     private $requests_results;
     private $max_retry_attempts;
     private $retry_backoff_ms;
+    private $server_anonymization;
 
     // Socket Parameters
 
@@ -53,14 +54,16 @@ class SocketEmitter extends Emitter {
      * @param bool|null $debug - If debug is on
      * @param int|null $max_retry_attempts - The maximum number of times to retry a request. Defaults to 1.
      * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
+     * @param bool|null $server_anonymization - Whether to enable Server Anonymization and not collect the IP or Network User ID. Defaults to false.
      */
-    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
+    public function __construct($uri, $ssl = NULL, $type = NULL, $timeout = NULL, $buffer_size = NULL, $debug = NULL, $max_retry_attempts = NULL, $retry_backoff_ms = NULL, $server_anonymization = false) {
         $this->type    = $this->getRequestType($type);
         $this->uri     = $uri;
         $this->ssl     = $ssl == NULL ? self::DEFAULT_SSL : (bool) $ssl;
         $this->timeout = $timeout == NULL ? self::SOCKET_TIMEOUT : $timeout;
         $this->max_retry_attempts = $max_retry_attempts;
         $this->retry_backoff_ms = $retry_backoff_ms;
+        $this->server_anonymization = $server_anonymization;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -240,6 +243,7 @@ class SocketEmitter extends Emitter {
             $req.= "Host: ".$uri."\r\n";
             $req.= "Content-Type: ".self::POST_CONTENT_TYPE."\r\n";
             $req.= "Content-length: ".strlen($data)."\r\n";
+            if ($this->server_anonymization) $req.= self::SERVER_ANONYMIZATION.": *\r\n";
             $req.= "Accept: ".self::POST_ACCEPT."\r\n\r\n";
             $req.= $data."\r\n\r\n";
         }
@@ -247,6 +251,7 @@ class SocketEmitter extends Emitter {
             $req = "GET http://".$uri.self::GET_PATH."?".$data." ";
             $req.= "HTTP/1.1\r\n";
             $req.= "Host: ".$uri."\r\n";
+            if ($this->server_anonymization) $req.= self::SERVER_ANONYMIZATION.": *\r\n";
             $req.= "Query: ".$data."\r\n";
             $req.= "\r\n";
         }

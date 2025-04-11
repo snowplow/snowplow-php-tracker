@@ -31,6 +31,7 @@ class CurlEmitter extends Emitter {
     private $debug;
     private $requests_results;
     private $debug_payloads;
+    private $server_anoymization;
 
     // Curl Specific Parameters
 
@@ -49,13 +50,16 @@ class CurlEmitter extends Emitter {
      * @param int|null $buffer_size - Emitter buffer size
      * @param bool $debug - Debug mode
      * @param int|null $curl_timeout - Maximum time the request is allowed to take, in seconds
+     * @param bool|null $server_anonymization - Whether to enable Server Anonymization and not collect the IP or Network User ID. Defaults to false.
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $curl_timeout = NULL) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $curl_timeout = NULL, $server_anonymization = false) {
         $this->type           = $this->getRequestType($type);
         $this->url            = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->curl_limit     = $this->type == "POST" ? self::CURL_AMOUNT_POST : self::CURL_AMOUNT_GET;
         $this->rolling_window = $this->type == "POST" ? self::CURL_WINDOW_POST : self::CURL_WINDOW_GET;
         $this->curl_timeout   = $curl_timeout;
+
+        $this->server_anonymization = $server_anonymization;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -222,19 +226,22 @@ class CurlEmitter extends Emitter {
      */
     private function getCurlRequest($payload, $type) {
         $ch = curl_init($this->url);
+        $header = array();
         if ($type == "POST") {
-            $header = array(
-                'Content-Type: '.self::POST_CONTENT_TYPE,
-                'Accept: '.self::POST_ACCEPT,
-                'Content-Length: '.strlen($payload));
+            $header[] = 'Content-Type: '.self::POST_CONTENT_TYPE;
+            $header[] = 'Accept: '.self::POST_ACCEPT;
+            $header[] = 'Content-Length: '.strlen($payload);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         }
         else {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($ch, CURLOPT_URL, $this->url."?".$payload);
         }
+
+        if ($this->server_anonymization) $header[] = self::SERVER_ANONYMIZATION.": *";
+
+        if ($header) curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         if ($this->curl_timeout != NULL) {
             curl_setopt($ch, CURLOPT_TIMEOUT, $this->curl_timeout);

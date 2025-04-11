@@ -45,7 +45,7 @@ class Constants {
      * - SSL: the default for whether or not to use SSL Encryption
      * - Type: the default for what type of request the emitter will be making (POST or GET)
      */
-    const TRACKER_VERSION       = "php-0.9.0";
+    const TRACKER_VERSION       = "php-0.9.1";
     const DEFAULT_BASE_64       = true;
     const DEBUG_LOG_FILES       = true;
     const CONTEXT_SCHEMA        = "iglu:com.snowplowanalytics.snowplow/contexts/jsonschema/1-0-1";
@@ -61,6 +61,7 @@ class Constants {
     const DEFAULT_SSL           = false;
     const DEFAULT_REQ_TYPE      = "POST";
     const NO_RETRY_STATUS_CODES = array(400, 401, 403, 410, 422);
+    const SERVER_ANONYMIZATION  = "SP-Anonymous";
 
     /**
      * Settings for the Synchronous Emitter
