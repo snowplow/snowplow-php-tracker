@@ -35,6 +35,7 @@ class SyncEmitter extends Emitter {
     private $requests_results;
     private $max_retry_attempts;
     private $retry_backoff_ms;
+    private $server_anonymization;
 
     /**
      * Creates a Synchronous Emitter
@@ -46,12 +47,14 @@ class SyncEmitter extends Emitter {
      * @param bool|null $debug - If debug is on
      * @param int|null $max_retry_attempts - The maximum number of times to retry a request. Defaults to 1.
      * @param int|null $retry_backoff_ms - The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
+     * @param bool|null $server_anonymization - Whether to enable Server Anonymization and not collect the IP or Network User ID. Defaults to false.
      */
-    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $max_retry_attempts = NULL, $retry_backoff_ms = NULL) {
+    public function __construct($uri, $protocol = NULL, $type = NULL, $buffer_size = NULL, $debug = false, $max_retry_attempts = NULL, $retry_backoff_ms = NULL, $server_anonymization = false) {
         $this->type = $this->getRequestType($type);
         $this->url  = $this->getCollectorUrl($this->type, $uri, $protocol);
         $this->max_retry_attempts = $max_retry_attempts;
         $this->retry_backoff_ms = $retry_backoff_ms;
+        $this->server_anonymization = $server_anonymization;
 
         // If debug is on create a requests_results array
         if ($debug === true) {
@@ -115,20 +118,23 @@ class SyncEmitter extends Emitter {
 
         // Create a cURL handle, set transfer options and execute
         $ch = curl_init($this->url);
+        $header = array();
         if ($type == 'POST') {
             $json_data = json_encode($data);
-            $header = array(
-                'Content-Type: '.self::POST_CONTENT_TYPE,
-                'Accept: '.self::POST_ACCEPT,
-                'Content-Length: '.strlen($json_data));
+            $header[] = 'Content-Type: '.self::POST_CONTENT_TYPE;
+            $header[] = 'Accept: '.self::POST_ACCEPT;
+            $header[] = 'Content-Length: '.strlen($json_data);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
             curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
         }
         else {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
             curl_setopt($ch, CURLOPT_URL, $this->url."?".http_build_query($data));
         }
+
+        if ($this->server_anonymization) $header[] = self::SERVER_ANONYMIZATION.': *';
+        if ($header) curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_exec($ch);
 
