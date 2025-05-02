@@ -31,7 +31,7 @@ class CurlEmitter extends Emitter {
     private $debug;
     private $requests_results;
     private $debug_payloads;
-    private $server_anoymization;
+    private $server_anonymization;
 
     // Curl Specific Parameters
 
