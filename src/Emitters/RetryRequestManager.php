@@ -31,7 +31,7 @@ class RetryRequestManager extends Constants {
     /// The number of milliseconds to backoff before retrying a request. Defaults to 100ms.
     private int $backoff_ms;
 
-    public function __construct(int $max_retry_attempts = NULL, int $backoff_ms = NULL) {
+    public function __construct(?int $max_retry_attempts = NULL, ?int $backoff_ms = NULL) {
         $this->max_retry_attempts = $max_retry_attempts == NULL ? 1 : $max_retry_attempts;
         $this->backoff_ms = $backoff_ms == NULL ? 100 : $backoff_ms;
     }
