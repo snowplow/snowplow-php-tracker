@@ -156,8 +156,6 @@ class SyncEmitter extends Emitter {
             }
             $res_.="Sync ".$type." Request Failed: ".curl_error($ch);
         }
-        // Close handle
-        curl_close($ch);
 
         // Retry request if necessary
         if ($retry_request_manager->shouldRetryForStatusCode($status_code)) {

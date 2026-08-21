@@ -205,10 +205,8 @@ class CurlEmitter extends Emitter {
                     curl_multi_add_handle($master, $ch);
                 }
                 curl_multi_remove_handle($master, $done['handle']);
-                curl_close($done['handle']);
             }
         } while ($running);
-        curl_multi_close($master);
 
         if ($res_ != "") {
             $res = $res_;
