@@ -1,10 +1,10 @@
-FROM --platform=linux/amd64 php:7.4
+FROM --platform=linux/amd64 php:8.4
 
-RUN pecl install xdebug-3.1.3 \
+RUN pecl install xdebug-3.4.7 \
     && docker-php-ext-enable xdebug
 
 RUN apt-get update \
- && apt-get install -y git wget tar
+ && apt-get install -y git wget tar unzip
 
 ADD ./script/install-composer.sh /script/install-composer.sh
 RUN chmod +x /script/install-composer.sh
